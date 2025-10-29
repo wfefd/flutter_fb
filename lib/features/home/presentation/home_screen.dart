@@ -1,8 +1,12 @@
 // lib/features/home/presentation/home_screen.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_fb/features/home/widgets/custom_bottom_nav_bar.dart';
 import '../../character/presentation/character_search_tab.dart';
 import '../../auction/presentation/auction_screen.dart';
 import '../../board/presentation/board_list_screen.dart';
+import '../../../core/widgets/custom_bottom_nav_bar.dart';
+
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -91,23 +95,9 @@ class _HomeScreenState extends State<HomeScreen> {
             : _bottomIndex == 0
                 ? const Center(child: Text('알림 페이지'))
                 : const Center(child: Text('설정 페이지')),
-        bottomNavigationBar: BottomNavigationBar(
+        bottomNavigationBar: CustomBottomNavBar(
           currentIndex: _bottomIndex,
-          onTap: (index) => setState(() => _bottomIndex = index),
-          items: const [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.notifications),
-              label: '알림',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: '홈',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.settings),
-              label: '설정',
-            ),
-          ],
+          onTabChanged: (index) => setState(() => _bottomIndex = index),
         ),
       ),
     );

@@ -7,6 +7,10 @@ import '../../features/home/presentation/home_screen.dart';
 import '../../features/character/presentation/character_search_screen.dart';
 import '../../features/character/presentation/character_detail_screen.dart';
 import '../../features/settings/presentation/settings_screen.dart';
+import '../../features/auction/presentation/auction_itemDetail_screen.dart';
+import '../../features/auction/presentation/auction_itemPrice_screen.dart';
+import '../../features/board/presentation/board_detail_screen.dart';
+
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -35,6 +39,28 @@ class AppRouter {
       case '/settings':
         return MaterialPageRoute(builder: (_) => const SettingsScreen());
 
+      // 경매장 아이템 정보 페이지
+      case '/auction_item_detail':
+        final item = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => AuctionItemDetailScreen(item: item),
+        );
+
+      // 경매장 아이템 시세 정보 페이지 
+      case '/item_price':
+        final item = settings.arguments as Map<String, dynamic>;
+        return MaterialPageRoute(
+          builder: (_) => ItemPriceScreen(item: item),
+        );
+
+      // ✅ 공지사항 상세 페이지 (게시판 상세)
+      case '/board_detail':
+        final notice = settings.arguments as Map<String, String>;
+        return MaterialPageRoute(
+          builder: (_) => BoardDetailScreen(),
+          settings: RouteSettings(arguments: notice),
+        );
+        
       // ❌ 기본 (없는 경로)
       default:
         return MaterialPageRoute(
@@ -42,6 +68,8 @@ class AppRouter {
             body: Center(child: Text('404 - 페이지를 찾을 수 없습니다.')),
           ),
         );
+
+        
     }
   }
 }
