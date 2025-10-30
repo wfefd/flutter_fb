@@ -5,8 +5,7 @@ import '../../character/presentation/character_search_tab.dart';
 import '../../auction/presentation/auction_screen.dart';
 import '../../board/presentation/board_list_screen.dart';
 import '../../../core/widgets/custom_bottom_nav_bar.dart';
-
-
+import '../../community/presentation/community_list_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -82,22 +81,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               )
             : null,
-        body: _bottomIndex == 1
-      ? const TabBarView(
-          children: [
-            CharacterSearchTab(),                 // 0: 홈
-            Center(child: Text('순위 탭')),        // 1: 순위
-            AuctionScreen(),                       // 2: 경매장
-            Center(child: Text('게시판 탭')),       // 3: (이전 BoardListScreen 자리) → 임시
-            BoardListScreen(),                     // 4: 공지사항 버튼에 공지 리스트 화면 연결!
-          ],
-        )
+      body: _bottomIndex == 1
+        ? const TabBarView(
+            children: [
+              CharacterSearchTab(),                 // 0: 홈
+              Center(child: Text('순위 탭')),        // 1: 순위
+              AuctionScreen(),                      // 2: 경매장
+              CommunityListScreen(),                // 3: 게시판  ← 여기 교체!
+              BoardListScreen(),                    // 4: 공지사항
+            ],
+          )
         : _bottomIndex == 0
-            ? Center(child: Text('알림 페이지'))
-            : Center(child: Text('설정 페이지')),
-            bottomNavigationBar: CustomBottomNavBar(
-              currentIndex: _bottomIndex,
-              onTabChanged: (index) => setState(() => _bottomIndex = index),
+            ? const Center(child: Text('알림 페이지'))
+            : const Center(child: Text('설정 페이지')),
+        bottomNavigationBar: CustomBottomNavBar(
+          currentIndex: _bottomIndex,
+          onTabChanged: (index) => setState(() => _bottomIndex = index),
         ),
       ),
     );

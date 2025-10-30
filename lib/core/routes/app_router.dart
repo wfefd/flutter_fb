@@ -12,6 +12,9 @@ import '../../features/auth/presentation/find_id_screen.dart';
 import '../../features/auth/presentation/find_password_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
 import '../../features/auth/presentation/guest_login_screen.dart';
+import '../../features/community/presentation/community_list_screen.dart';
+import '../../features/community/presentation/community_post_write_screen.dart';
+import '../../features/board/presentation/board_write_screen.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -50,12 +53,31 @@ class AppRouter {
         final item = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(builder: (_) => ItemPriceScreen(item: item));
 
-      // ✅ 공지사항 상세 페이지 (게시판 상세)
+      // ✅ 공지사항 상세 페이지 (공지사항 상세)
       case '/board_detail':
         final notice = settings.arguments as Map<String, String>;
         return MaterialPageRoute(
           builder: (_) => BoardDetailScreen(),
           settings: RouteSettings(arguments: notice),
+        );
+
+      // ✅ 공지사항 작성 페이지      
+      case '/notice_write':
+        // 필요한 경우 settings.arguments 로 레포지토리를 전달받음 (선택)
+        return MaterialPageRoute(
+          builder: (_) => const NoticeWriteScreen(),
+          settings: settings,
+        );
+      // ✅ 게시판 페이지 (게시판 상세)
+      case '/community':
+        return MaterialPageRoute(builder: (_) => const CommunityListScreen());
+
+      // ✅ 게시판 작성 페이지
+      case '/community_post_write':
+        // arguments 로 레포( InMemoryCommunityRepository )를 전달받음
+        return MaterialPageRoute(
+          builder: (_) => const CommunityPostWriteScreen(),
+          settings: settings,
         );
 
       // ❌ 기본 (없는 경로)
