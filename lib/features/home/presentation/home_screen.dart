@@ -4,8 +4,10 @@ import 'package:flutter_fb/features/home/widgets/custom_bottom_nav_bar.dart';
 import '../../character/presentation/character_search_tab.dart';
 import '../../auction/presentation/auction_screen.dart';
 import '../../board/presentation/board_list_screen.dart';
-import '../../../core/widgets/custom_bottom_nav_bar.dart';
 import '../../community/presentation/community_list_screen.dart';
+
+// ✅ 새로 추가
+import '../../ranking/presentation/ranking_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,7 +23,6 @@ class _HomeScreenState extends State<HomeScreen> {
   void _onSearch() {
     final query = _controller.text.trim();
     if (query.isEmpty) return;
-
     Navigator.pushNamed(context, '/character_search', arguments: query);
   }
 
@@ -42,7 +43,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       style: TextStyle(fontWeight: FontWeight.bold),
                     ),
                     const SizedBox(width: 10),
-                    // 🔍 검색창 추가 부분
                     Expanded(
                       child: SizedBox(
                         height: 38,
@@ -51,8 +51,9 @@ class _HomeScreenState extends State<HomeScreen> {
                           onSubmitted: (_) => _onSearch(),
                           decoration: InputDecoration(
                             hintText: '캐릭터 검색',
-                            contentPadding:
-                                const EdgeInsets.symmetric(horizontal: 8),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                            ),
                             suffixIcon: IconButton(
                               icon: const Icon(Icons.search),
                               onPressed: _onSearch,
@@ -81,17 +82,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               )
             : null,
-      body: _bottomIndex == 1
-        ? const TabBarView(
-            children: [
-              CharacterSearchTab(),                 // 0: 홈
-              Center(child: Text('순위 탭')),        // 1: 순위
-              AuctionScreen(),                      // 2: 경매장
-              CommunityListScreen(),                // 3: 게시판  ← 여기 교체!
-              BoardListScreen(),                    // 4: 공지사항
-            ],
-          )
-        : _bottomIndex == 0
+        body: _bottomIndex == 1
+            ? const TabBarView(
+                children: [
+                  CharacterSearchTab(), // 0: 홈
+                  RankingScreen(), // ✅ 1: 순위 — 여기 교체됨
+                  AuctionScreen(), // 2: 경매장
+                  CommunityListScreen(), // 3: 게시판
+                  BoardListScreen(), // 4: 공지사항
+                ],
+              )
+            : _bottomIndex == 0
             ? const Center(child: Text('알림 페이지'))
             : const Center(child: Text('설정 페이지')),
         bottomNavigationBar: CustomBottomNavBar(

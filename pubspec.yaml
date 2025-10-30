@@ -32,6 +32,8 @@ flutter:
   # 🖼️ 프로젝트에 포함된 이미지 리소스 (assets)
   assets:
     - assets/images/
+    - assets/images/jobs/
+
     # 예: assets/images/character1.png
     #     assets/images/character2.png
     #     assets/images/no_image.png
