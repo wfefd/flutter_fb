@@ -22,7 +22,6 @@ String categoryToString(PostCategory c) {
     case PostCategory.maintenance:
       return 'maintenance';
     case PostCategory.general:
-    default:
       return 'general';
   }
 }

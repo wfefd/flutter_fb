@@ -17,6 +17,7 @@ dependencies:
 
   # iOS 스타일 아이콘
   cupertino_icons: ^1.0.8
+  fl_chart: ^1.1.1
 
 dev_dependencies:
   flutter_test:
@@ -33,6 +34,8 @@ flutter:
   assets:
     - assets/images/
     - assets/images/jobs/
+    - assets/images/items/
+
 
     # 예: assets/images/character1.png
     #     assets/images/character2.png

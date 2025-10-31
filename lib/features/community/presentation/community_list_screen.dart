@@ -119,15 +119,10 @@ class _CommunityListScreenState extends State<CommunityListScreen> {
                             trailing:
                                 const Icon(Icons.arrow_forward_ios, size: 16),
                             onTap: () {
-                              // 기존 BoardDetailScreen이 Map<String, String>을 받으므로 변환
                               Navigator.pushNamed(
                                 context,
-                                '/board_detail',
-                                arguments: {
-                                  'title': p.title,
-                                  'date': _fmtDate(p.createdAt),
-                                  'content': p.content,
-                                },
+                                '/community_detail',
+                                arguments: p, // CommunityPost 그대로 전달
                               );
                             },
                           );

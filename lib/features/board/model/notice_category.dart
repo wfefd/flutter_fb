@@ -22,7 +22,6 @@ String noticeCategoryToString(NoticeCategory c) {
     case NoticeCategory.maintenance:
       return 'maintenance';
     case NoticeCategory.general:
-    default:
       return 'general';
   }
 }
