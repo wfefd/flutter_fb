@@ -19,7 +19,6 @@ import '../../features/community/presentation/community_detail_screen.dart';
 import '../../features/community/model/community_post.dart';
 import '../../features/community/repository/community_repository.dart';
 
-
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
@@ -51,7 +50,7 @@ class AppRouter {
           builder: (_) => const AuctionItemDetailScreen(),
           settings: settings,
         );
-            // 경매장 아이템 시세 정보 페이지
+      // 경매장 아이템 시세 정보 페이지
       case '/item_price':
         final item = settings.arguments as Map<String, dynamic>;
         return MaterialPageRoute(builder: (_) => ItemPriceScreen(item: item));
@@ -64,7 +63,7 @@ class AppRouter {
           settings: RouteSettings(arguments: notice),
         );
 
-      // ✅ 공지사항 작성 페이지      
+      // ✅ 공지사항 작성 페이지
       case '/notice_write':
         // 필요한 경우 settings.arguments 로 레포지토리를 전달받음 (선택)
         return MaterialPageRoute(
@@ -83,34 +82,34 @@ class AppRouter {
           settings: settings,
         );
 
-      case '/community_detail': {
-        final arg = settings.arguments;
-        if (arg is Map &&
-            arg['post'] is CommunityPost &&
-            arg['repo'] is InMemoryCommunityRepository) {
-          final post = arg['post'] as CommunityPost;
-          final repo = arg['repo'] as InMemoryCommunityRepository;
+      case '/community_detail':
+        {
+          final arg = settings.arguments;
+          if (arg is Map &&
+              arg['post'] is CommunityPost &&
+              arg['repo'] is InMemoryCommunityRepository) {
+            final post = arg['post'] as CommunityPost;
+            final repo = arg['repo'] as InMemoryCommunityRepository;
+            return MaterialPageRoute(
+              builder: (_) => CommunityDetailScreen(post: post, repo: repo),
+              settings: settings,
+            );
+          }
+          // 방어: post만 온 경우에도 임시 repo 만들어서 열어주기
+          if (arg is CommunityPost) {
+            return MaterialPageRoute(
+              builder: (_) => CommunityDetailScreen(
+                post: arg,
+                repo: InMemoryCommunityRepository(), // fallback
+              ),
+              settings: settings,
+            );
+          }
           return MaterialPageRoute(
-            builder: (_) => CommunityDetailScreen(post: post, repo: repo),
-            settings: settings,
+            builder: (_) =>
+                const Scaffold(body: Center(child: Text('잘못된 커뮤니티 글 데이터입니다.'))),
           );
         }
-        // 방어: post만 온 경우에도 임시 repo 만들어서 열어주기
-        if (arg is CommunityPost) {
-          return MaterialPageRoute(
-            builder: (_) => CommunityDetailScreen(
-              post: arg,
-              repo: InMemoryCommunityRepository(), // fallback
-            ),
-            settings: settings,
-          );
-        }
-        return MaterialPageRoute(
-          builder: (_) => const Scaffold(
-            body: Center(child: Text('잘못된 커뮤니티 글 데이터입니다.')),
-          ),
-        );
-      }
 
       // ❌ 기본 (없는 경로)
       default:

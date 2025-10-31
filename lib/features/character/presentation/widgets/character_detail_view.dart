@@ -1,18 +1,24 @@
-// 상세보기
 import 'package:flutter/material.dart';
 
 class CharacterDetailView extends StatefulWidget {
-  final Map<String, dynamic> character; // 전달받은 캐릭터 데이터
-  const CharacterDetailView({super.key, required this.character});
+  final Map<String, dynamic> character;
+  final bool fromRanking; // 🔹 랭킹에서 진입 여부
+
+  const CharacterDetailView({
+    super.key,
+    required this.character,
+    this.fromRanking = false,
+  });
 
   @override
   State<CharacterDetailView> createState() => _CharacterDetailViewState();
 }
 
-class _CharacterDetailViewState extends State<CharacterDetailView> {
+class _CharacterDetailViewState extends State<CharacterDetailView>
+    with AutomaticKeepAliveClientMixin {
   int _selectedTabIndex = 0;
 
-  final List<String> tabs = [
+  final List<String> tabs = const [
     '장착장비',
     '스탯',
     '세부스탯',
@@ -23,221 +29,185 @@ class _CharacterDetailViewState extends State<CharacterDetailView> {
     '스킬정보',
   ];
 
+  final Map<int, Future<String>> _tabDataCache = {};
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     final c = widget.character;
 
-    return Column(
-      children: [
-        Expanded(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                // 캐릭터 이미지 및 기본정보
-                Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 12,
-                  ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Expanded(
-                        flex: 1,
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.asset(
-                            c['image'] ?? 'assets/images/no_image.png',
-                            fit: BoxFit.cover,
-                            height: 200,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      Expanded(
-                        flex: 1,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              c['name'],
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            Text(
-                              '${c['class']} | ${c['server']}',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '레벨: Lv.${c['level']}',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                const Icon(
-                                  Icons.workspace_premium,
-                                  color: Colors.amber,
-                                  size: 22,
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  c['power'] ?? '0',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.amber,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+    return Scaffold(
+      backgroundColor: Colors.white,
 
-                const SizedBox(height: 10),
+      // 🔹 랭킹에서 진입했을 때만 AppBar 보이게
+      appBar: widget.fromRanking
+          ? AppBar(
+              title: Text(
+                c['name'] ?? '캐릭터 정보',
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              backgroundColor: const Color(0xFF7BC57B),
+              foregroundColor: Colors.white,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new),
+                onPressed: () => Navigator.pop(context),
+              ),
+              elevation: 2,
+            )
+          : null,
 
-                // 안내박스
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF1F1F1),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    padding: const EdgeInsets.all(10),
-                    child: const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          '• 캐릭터 스탯 및 조회는 2023.12.21 이후 접속한 계정의 캐릭터만 확인 가능합니다.',
-                          style: TextStyle(fontSize: 12, color: Colors.black87),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          '• 캐릭터 정보와 유니온 정보는 실시간으로 갱신됩니다. 평균 15분 내외의 딜레이가 있을 수 있습니다.',
-                          style: TextStyle(fontSize: 12, color: Colors.black87),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // 탭
-                _buildTabs(),
-
-                const SizedBox(height: 20),
-
-                // 탭별 내용
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: _buildTabContent(_selectedTabIndex),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTabs() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Column(
+      body: Column(
         children: [
-          // 첫 번째 행
-          Row(
-            children: List.generate(4, (index) {
-              final isSelected = _selectedTabIndex == index;
-              final text = tabs[index];
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () => setState(() => _selectedTabIndex = index),
-                  child: Container(
-                    height: 40,
-                    color: isSelected ? const Color(0xFF7BC57B) : Colors.white,
-                    alignment: Alignment.center,
-                    child: Text(
-                      text,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: isSelected ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
-          const Divider(height: 1, color: Color(0xEEEEEEEE)),
-
-          // 두 번째 행
-          Row(
-            children: List.generate(4, (index) {
-              final actualIndex = index + 4;
-              final isSelected = _selectedTabIndex == actualIndex;
-              final text = tabs[actualIndex];
-              return Expanded(
-                child: GestureDetector(
-                  onTap: () => setState(() => _selectedTabIndex = actualIndex),
-                  child: Container(
-                    height: 40,
-                    color: isSelected ? const Color(0xFF7BC57B) : Colors.white,
-                    alignment: Alignment.center,
-                    child: Text(
-                      text,
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                        color: isSelected ? Colors.white : Colors.black87,
-                      ),
-                    ),
-                  ),
-                ),
-              );
-            }),
-          ),
-          Container(height: 1, color: const Color(0xFFE0E0E0)),
+          _buildCharacterInfo(c),
+          const Divider(height: 1),
+          _buildTabSelector(),
+          const Divider(height: 1),
+          Expanded(child: _buildTabContent()),
         ],
       ),
     );
   }
 
-  Widget _buildTabContent(int index) {
+  /// 🔹 캐릭터 기본 정보
+  Widget _buildCharacterInfo(Map<String, dynamic> c) {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.asset(
+              c['image'] ?? 'assets/images/no_image.png',
+              width: 120,
+              height: 120,
+              fit: BoxFit.cover,
+              cacheWidth: 240,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  c['name'] ?? 'Unknown',
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  '${c['class'] ?? ''} | ${c['server'] ?? ''}',
+                  style: const TextStyle(color: Colors.grey),
+                ),
+                const SizedBox(height: 6),
+                Text('Lv.${c['level'] ?? 0}'),
+                const SizedBox(height: 6),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.workspace_premium,
+                      color: Colors.amber,
+                      size: 22,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      c['power'] ?? '0',
+                      style: const TextStyle(
+                        color: Colors.amber,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 🔹 탭 선택 바
+  Widget _buildTabSelector() {
+    return Wrap(
+      spacing: 1,
+      runSpacing: 1,
+      children: List.generate(tabs.length, (index) {
+        final isSelected = _selectedTabIndex == index;
+        return SizedBox(
+          width: MediaQuery.of(context).size.width / 4 - 1,
+          height: 40,
+          child: InkWell(
+            onTap: () => setState(() => _selectedTabIndex = index),
+            child: Container(
+              color: isSelected ? const Color(0xFF7BC57B) : Colors.white,
+              alignment: Alignment.center,
+              child: Text(
+                tabs[index],
+                style: TextStyle(
+                  color: isSelected ? Colors.white : Colors.black87,
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                  fontSize: 13,
+                ),
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+
+  /// 🔹 탭 내용 (IndexedStack + Lazy Loading)
+  Widget _buildTabContent() {
+    return IndexedStack(
+      index: _selectedTabIndex,
+      children: List.generate(tabs.length, (i) {
+        _tabDataCache[i] ??= _loadTabData(i);
+
+        return FutureBuilder<String>(
+          future: _tabDataCache[i],
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            }
+            if (snapshot.hasError) {
+              return const Center(child: Text('데이터 로드 실패'));
+            }
+            return Center(
+              child: Text(snapshot.data!, style: const TextStyle(fontSize: 16)),
+            );
+          },
+        );
+      }),
+    );
+  }
+
+  /// 🔹 탭별 비동기 데이터 로딩 (예시)
+  Future<String> _loadTabData(int index) async {
+    await Future.delayed(const Duration(milliseconds: 600)); // 로딩 시뮬레이션
     switch (index) {
       case 0:
-        return const Text('스탯/장비 내용 표시');
+        return '장착장비 데이터 로드 완료';
       case 1:
-        return const Text('유니온 정보 표시');
+        return '스탯 정보 로드 완료';
       case 2:
-        return const Text('스킬 / 심볼 관련 내용');
+        return '세부스탯 데이터 로드 완료';
       case 3:
-        return const Text('본캐 / 부캐 정보');
+        return '아바타 & 크리쳐 정보 로드 완료';
       case 4:
-        return const Text('큐브 내용');
+        return '버프 강화 데이터 로드 완료';
       case 5:
-        return const Text('스타포스 내용');
+        return '스킬 개화 정보 로드 완료';
+      case 6:
+        return '딜표 데이터 로드 완료';
+      case 7:
+        return '스킬 정보 로드 완료';
       default:
-        return const SizedBox.shrink();
+        return '데이터 없음';
     }
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }

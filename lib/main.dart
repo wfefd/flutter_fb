@@ -3,6 +3,8 @@ import "package:flutter/material.dart";
 import 'core/routes/app_router.dart';
 
 void main() {
+  debugProfileBuildsEnabled = true;
+  debugPrintRebuildDirtyWidgets = true;
   runApp(const MyApp());
 }
 
