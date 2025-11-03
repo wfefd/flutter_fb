@@ -14,12 +14,17 @@ class PriceLineChartFirst5 extends StatelessWidget {
 
   final EdgeInsets padding;
   final List<Color> gradientColors;
+  final Color backgroundColor; // ✅ 배경색을 외부에서 전달받도록 추가
 
   const PriceLineChartFirst5({
     super.key,
     required this.history,
     this.padding = const EdgeInsets.all(16),
-    this.gradientColors = const [Color(0xff23b6e6), Color(0xff02d39a)],
+    this.gradientColors = const [
+      Colors.amber,
+      Colors.deepOrangeAccent,
+    ],
+    this.backgroundColor = const Color(0xff2a3a4c), // ✅ 기본 배경색 설정
   });
 
   @override
@@ -45,7 +50,19 @@ class PriceLineChartFirst5 extends StatelessWidget {
     }
 
     if (values.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+      // 데이터 없는 경우 표시 개선
+      return Container(
+        decoration: BoxDecoration(
+          borderRadius: const BorderRadius.all(Radius.circular(12)),
+          color: backgroundColor, // ✅ 외부에서 전달받은 배경색 사용
+        ),
+        child: const Center(
+          child: Text(
+            '시세 기록이 없습니다.',
+            style: TextStyle(color: Colors.grey),
+          ),
+        ),
+      );
     }
 
     // FlSpot 변환
@@ -66,12 +83,16 @@ class PriceLineChartFirst5 extends StatelessWidget {
       minY -= pad;
       maxY += pad;
     }
+    // 최소값은 0보다 낮아지지 않도록
+    minY = max(0, minY);
+
 
     return Container(
-      decoration: const BoxDecoration(
-        borderRadius: BorderRadius.all(Radius.circular(12)),
-        color: Color(0xff232d37),
-      ),
+      // Container의 배경색은 외부 Container에서 담당하므로 여기서는 제거
+      // decoration: BoxDecoration(
+      //   borderRadius: const BorderRadius.all(Radius.circular(12)),
+      //   color: backgroundColor, // ✅ 외부에서 전달받은 배경색 사용
+      // ),
       padding: padding,
       child: LineChart(
         LineChartData(
@@ -93,7 +114,10 @@ class PriceLineChartFirst5 extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 6),
                     child: Text(
                       labels[i],
-                      style: const TextStyle(color: Color(0xff68737d), fontSize: 11),
+                      style: TextStyle(
+                        color: Colors.white.withOpacity(0.6),
+                        fontSize: 11,
+                      ),
                     ),
                   );
                 },
@@ -106,7 +130,10 @@ class PriceLineChartFirst5 extends StatelessWidget {
                 interval: ((maxY - minY) / 4).clamp(1, double.infinity),
                 getTitlesWidget: (value, meta) => Text(
                   value.toStringAsFixed(0),
-                  style: const TextStyle(color: Color(0xff67727d), fontSize: 11),
+                  style: TextStyle(
+                    color: Colors.white.withOpacity(0.6),
+                    fontSize: 11,
+                  ),
                 ),
                 reservedSize: 40,
               ),
@@ -114,17 +141,21 @@ class PriceLineChartFirst5 extends StatelessWidget {
           ),
           borderData: FlBorderData(
             show: true,
-            border: Border.all(color: const Color(0xff37434d), width: 1),
+            border: Border.all(color: Colors.white.withOpacity(0.15), width: 1),
           ),
           gridData: FlGridData(
             show: true,
             drawVerticalLine: true,
             horizontalInterval: ((maxY - minY) / 4).clamp(1, double.infinity),
             verticalInterval: 1,
-            getDrawingHorizontalLine: (value) =>
-                const FlLine(color: Color(0xff37434d), strokeWidth: 1),
-            getDrawingVerticalLine: (value) =>
-                const FlLine(color: Color(0xff37434d), strokeWidth: 1),
+            getDrawingHorizontalLine: (value) => FlLine(
+              color: Colors.white.withOpacity(0.1),
+              strokeWidth: 1,
+            ),
+            getDrawingVerticalLine: (value) => FlLine(
+              color: Colors.white.withOpacity(0.1),
+              strokeWidth: 1,
+            ),
           ),
           lineBarsData: [
             LineChartBarData(
@@ -137,25 +168,60 @@ class PriceLineChartFirst5 extends StatelessWidget {
               ),
               barWidth: 4,
               isStrokeCapRound: true,
-              dotData: FlDotData(show: true), // 포인트 5개라 점 보이도록
+              dotData: FlDotData(
+                show: true,
+                getDotPainter: (spot, percent, barData, index) {
+                  return FlDotCirclePainter(
+                    radius: 5,
+                    color: Colors.white,
+                    strokeWidth: 2,
+                    strokeColor: barData.gradient?.colors.first ??
+                        barData.color ??
+                        Colors.amber,
+                  );
+                },
+              ),
               belowBarData: BarAreaData(
                 show: true,
                 gradient: LinearGradient(
-                  colors: gradientColors.map((c) => c.withOpacity(0.25)).toList(),
+                  colors: gradientColors
+                      .map((c) => c.withOpacity(0.25))
+                      .toList(),
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
               ),
             ),
           ],
+          // 툴팁
           lineTouchData: LineTouchData(
+            handleBuiltInTouches: true,
             touchTooltipData: LineTouchTooltipData(
-              getTooltipItems: (touched) => touched
-                  .map((ts) => LineTooltipItem(
-                        '${values[ts.spotIndex].toStringAsFixed(0)} G',
-                        const TextStyle(color: Colors.white),
-                      ))
-                  .toList(),
+              getTooltipColor: (LineBarSpot touchedSpot) {
+                return Colors.black.withOpacity(0.8);
+              },
+              tooltipBorderRadius: BorderRadius.circular(8.0),
+              getTooltipItems: (List<LineBarSpot> touchedSpots) {
+                return touchedSpots.map((LineBarSpot touchedSpot) {
+                  final int spotIndex = touchedSpot.spotIndex;
+                  // 범위 체크
+                  if (spotIndex < 0 || spotIndex >= values.length) {
+                    return null;
+                  }
+
+                  final String label = labels[spotIndex];
+                  final String price = values[spotIndex].toStringAsFixed(0);
+
+                  return LineTooltipItem(
+                    '$label: $price G',
+                    const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  );
+                }).toList();
+              },
             ),
           ),
         ),
@@ -166,15 +232,15 @@ class PriceLineChartFirst5 extends StatelessWidget {
   String _labelOf(data.PriceRange r) {
     switch (r) {
       case data.PriceRange.d7:
-        return '7D';
+        return '365D';
       case data.PriceRange.d14:
-        return '14D';
+        return '90D';
       case data.PriceRange.d30:
         return '30D';
       case data.PriceRange.d90:
-        return '90D';
+        return '14D';
       case data.PriceRange.d365:
-        return '365D';
+        return '7D';
     }
   }
 }
