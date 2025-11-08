@@ -1,6 +1,7 @@
 // lib/main.dart
-import "package:flutter/material.dart";
+import 'package:flutter/material.dart';
 import 'core/routes/app_router.dart';
+import 'core/theme/app_theme.dart'; // ✅ 추가
 
 void main() {
   debugProfileBuildsEnabled = true;
@@ -16,7 +17,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Game Search',
-      theme: ThemeData(primarySwatch: Colors.blue),
+      theme: appTheme, // ✅ 커스텀 테마 적용
       initialRoute: '/',
       onGenerateRoute: AppRouter.generateRoute,
     );

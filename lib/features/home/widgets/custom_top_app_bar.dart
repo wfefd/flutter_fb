@@ -1,5 +1,8 @@
-// lib/core/widgets/custom_top_app_bar.dart
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_spacing.dart';
+
+import '../../../core/theme/app_text_styles.dart';
 
 class CustomTopAppBar extends StatefulWidget implements PreferredSizeWidget {
   final bool showTabBar;
@@ -9,8 +12,8 @@ class CustomTopAppBar extends StatefulWidget implements PreferredSizeWidget {
   State<CustomTopAppBar> createState() => _CustomTopAppBarState();
 
   @override
-  Size get preferredSize => Size.fromHeight(
-      kToolbarHeight + (showTabBar ? kTextTabBarHeight : 0.0));
+  Size get preferredSize =>
+      Size.fromHeight(kToolbarHeight + (showTabBar ? kTextTabBarHeight : 0.0));
 }
 
 class _CustomTopAppBarState extends State<CustomTopAppBar> {
@@ -25,51 +28,52 @@ class _CustomTopAppBarState extends State<CustomTopAppBar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      titleSpacing: 8,
+      backgroundColor: AppColors.surface,
+      elevation: 0,
+      titleSpacing: AppSpacing.sm,
       title: Row(
         children: [
-          const Text(
-            '게임 검색 시스템',
-            style: TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(width: 10),
+          // 로고 이미지로 교체 가능
+          Image.asset('assets/images/logo_done.png', height: 52),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: SizedBox(
+            child: Container(
               height: 38,
-              child: TextField(
-                controller: _controller,
-                onSubmitted: (_) => _onSearch(),
-                decoration: InputDecoration(
-                  hintText: '캐릭터 검색',
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                  suffixIcon: IconButton(
+              decoration: BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _controller,
+                      onSubmitted: (_) => _onSearch(),
+                      decoration: InputDecoration(
+                        hintText: '던전앤파이터 캐릭터 검색',
+                        hintStyle: AppTextStyles.body2.copyWith(
+                          color: AppColors.secondaryText,
+                        ),
+                        border: InputBorder.none,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.md,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                  ),
+                  IconButton(
                     icon: const Icon(Icons.search),
+                    color: AppColors.secondaryText,
                     onPressed: _onSearch,
                   ),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  filled: true,
-                  fillColor: Colors.white.withOpacity(0.1),
-                ),
+                ],
               ),
             ),
           ),
         ],
       ),
-      bottom: widget.showTabBar
-          ? const TabBar(
-              isScrollable: true,
-              indicatorColor: Colors.white,
-              tabs: [
-                Tab(text: '홈'),
-                Tab(text: '순위'),
-                Tab(text: '경매장'),
-                Tab(text: '게시판'),
-                Tab(text: '공지사항'),
-              ],
-            )
-          : null,
     );
   }
 }

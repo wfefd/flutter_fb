@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/widgets/custom_text_field.dart';
+import '../../../core/widgets/primary_button.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});
@@ -9,66 +14,43 @@ class LoginScreen extends StatelessWidget {
     final passwordController = TextEditingController();
 
     return Scaffold(
+      backgroundColor: AppColors.background,
       body: Center(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.lg,
+            vertical: AppSpacing.xl,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Text(
+              // 로고나 타이틀
+              Text(
                 '로그인',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                style: AppTextStyles.h1.copyWith(color: AppColors.primaryText),
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: AppSpacing.xl),
 
-              // 이메일
-              TextField(
-                controller: emailController,
-                decoration: InputDecoration(
-                  labelText: '이메일',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  prefixIcon: const Icon(Icons.email_outlined),
-                ),
-              ),
-              const SizedBox(height: 16),
+              // 이메일 입력
+              CustomTextField(hintText: '이메일 주소', controller: emailController),
+              const SizedBox(height: AppSpacing.md),
 
-              // 비밀번호
-              TextField(
-                controller: passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: '비밀번호',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  prefixIcon: const Icon(Icons.lock_outline),
-                ),
-              ),
-              const SizedBox(height: 24),
+              // 비밀번호 입력
+              CustomTextField(hintText: '비밀번호', controller: passwordController),
+              const SizedBox(height: AppSpacing.lg),
 
               // 로그인 버튼
-              ElevatedButton(
+              PrimaryButton(
+                text: '로그인',
                 onPressed: () {
                   Navigator.pushReplacementNamed(context, '/home');
                 },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text(
-                  '로그인',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: AppSpacing.lg),
 
-              // 추가 옵션 버튼 구역
+              // 회원가입 / 아이디 / 비밀번호 찾기
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -88,7 +70,7 @@ class LoginScreen extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: AppSpacing.md),
 
               // 게스트 로그인
               Center(
@@ -97,12 +79,14 @@ class LoginScreen extends StatelessWidget {
                     Navigator.pushReplacementNamed(context, '/home');
                   },
                   icon: const Icon(Icons.person_outline),
-                  label: const Text(
+                  label: Text(
                     '게스트 로그인',
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    style: AppTextStyles.body1.copyWith(
+                      color: AppColors.secondaryText,
+                    ),
                   ),
                   style: TextButton.styleFrom(
-                    foregroundColor: Colors.grey[700],
+                    foregroundColor: AppColors.secondaryText,
                   ),
                 ),
               ),
@@ -113,7 +97,7 @@ class LoginScreen extends StatelessWidget {
     );
   }
 
-  // 🔹 공통 텍스트 버튼 스타일
+  // 공통 서브 텍스트 버튼
   Widget _buildTextButton({
     required String label,
     required VoidCallback onPressed,
@@ -122,11 +106,7 @@ class LoginScreen extends StatelessWidget {
       onPressed: onPressed,
       child: Text(
         label,
-        style: const TextStyle(
-          fontSize: 15,
-          color: Colors.blueAccent,
-          fontWeight: FontWeight.w500,
-        ),
+        style: AppTextStyles.body2.copyWith(color: AppColors.primaryText),
       ),
     );
   }

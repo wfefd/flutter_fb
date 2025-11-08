@@ -32,11 +32,18 @@ flutter:
 
   # 🖼️ 프로젝트에 포함된 이미지 리소스 (assets)
   assets:
+    - assets/fonts/
     - assets/images/
     - assets/images/jobs/
     - assets/images/items/
-
-
+    - assets/images/logo_done.png
+  fonts:
+    - family: Pretendard
+      fonts:
+        - asset: assets/fonts/Pretendard-Regular.ttf
+        - asset: assets/fonts/Pretendard-Medium.ttf
+        - asset: assets/fonts/Pretendard-SemiBold.ttf
+        - asset: assets/fonts/Pretendard-Bold.ttf
     # 예: assets/images/character1.png
     #     assets/images/character2.png
     #     assets/images/no_image.png
@@ -48,3 +55,6 @@ flutter:
   #       - asset: assets/fonts/NanumSquare-Regular.ttf
   #       - asset: assets/fonts/NanumSquare-Bold.ttf
   #         weight: 700
+
+
+ 
