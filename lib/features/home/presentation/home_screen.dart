@@ -1,3 +1,5 @@
+// lib/features/home/presentation/home_screen.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_fb/features/home/widgets/custom_bottom_nav_bar.dart';
 import 'package:flutter_fb/features/home/widgets/custom_top_app_bar.dart';
@@ -8,6 +10,7 @@ import '../../board/presentation/board_list_screen.dart';
 import '../../community/presentation/community_list_screen.dart';
 import '../../ranking/presentation/ranking_screen.dart';
 import '../../../core/theme/app_colors.dart';
+import '../widgets/ranking_table_container.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -21,35 +24,46 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ 임시 데이터
+    final dummyRows = [
+      {'rank': 1, 'name': '오지환', 'level': 300, 'job': '키네시스'},
+      {'rank': 2, 'name': '버터', 'level': 300, 'job': '나이트로드'},
+      {'rank': 3, 'name': '테룡이', 'level': 300, 'job': '카이저'},
+      {'rank': 4, 'name': '솝상', 'level': 300, 'job': '비숍'},
+      {'rank': 5, 'name': '보마노랑이', 'level': 300, 'job': '보우마스터'},
+    ];
+
     return DefaultTabController(
       length: 5,
       child: Scaffold(
-        backgroundColor: AppColors.background, // ✅ 전체 배경색 지정
+        backgroundColor: AppColors.background,
         body: Column(
-          crossAxisAlignment: CrossAxisAlignment.start, // ✅ 탭바 왼쪽 정렬
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // ✅ 상단 AppBar (검색창만 포함)
             const CustomTopAppBar(showTabBar: false),
-
-            // ✅ 항상 탭바 보이게
             const CustomTabBar(),
-
-            // ✅ 탭 컨텐츠
-            const Expanded(
+            Expanded(
               child: TabBarView(
                 children: [
-                  CharacterSearchTab(),
-                  RankingScreen(),
-                  AuctionScreen(),
-                  CommunityListScreen(),
-                  BoardListScreen(),
+                  // ✅ 홈탭: 캐릭터 검색 + 랭킹 블록
+                  SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: 24),
+                    child: Column(
+                      children: [
+                        const CharacterSearchTab(),
+                        WorldRankingBlock(rows: dummyRows), // ✅ 여기서 보임
+                      ],
+                    ),
+                  ),
+                  const RankingScreen(),
+                  const AuctionScreen(),
+                  const CommunityListScreen(),
+                  const BoardListScreen(),
                 ],
               ),
             ),
           ],
         ),
-
-        // ✅ 하단 네비게이션바
         bottomNavigationBar: CustomBottomNavBar(
           currentIndex: _bottomIndex,
           onTabChanged: (index) => setState(() => _bottomIndex = index),

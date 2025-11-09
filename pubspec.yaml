@@ -12,21 +12,21 @@ dependencies:
     sdk: flutter
 
   # 🔥 Firebase 관련 패키지
-  firebase_core: ^3.8.0
-  firebase_auth: ^5.3.0
+  firebase_core: ^4.2.1
+  firebase_auth: ^6.1.2
 
   # iOS 스타일 아이콘
   cupertino_icons: ^1.0.8
   fl_chart: ^1.1.1
   intl: ^0.20.2
+  flutter_native_splash: ^2.4.7
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   # 권장 린트 규칙
-  flutter_lints: ^5.0.0
-
+  flutter_lints: ^6.0.0
 flutter:
   # 📦 기본 머티리얼 아이콘 사용
   uses-material-design: true
@@ -38,6 +38,7 @@ flutter:
     - assets/images/jobs/
     - assets/images/items/
     - assets/images/logo_done.png
+    - assets/images/logo_done_big.png
   fonts:
     - family: Pretendard
       fonts:
@@ -57,5 +58,11 @@ flutter:
   #       - asset: assets/fonts/NanumSquare-Bold.ttf
   #         weight: 700
 
+flutter_native_splash:
+  color: "#FFFFFF" # 배경색
+  image: assets/images/logo_done_big.png  # ✅ 띄울 로고 경로
+  android: true  # 안드로이드용 스플래시 생성
+  ios: true      # iOS용 스플래시 생성
+  web: false     # 웹 버전엔 적용 안 함
 
  

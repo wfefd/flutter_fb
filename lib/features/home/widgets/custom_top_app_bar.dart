@@ -58,7 +58,7 @@ class _CustomTopAppBarState extends State<CustomTopAppBar> {
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: AppSpacing.md,
-                          vertical: 12,
+                          vertical: AppSpacing.sm,
                         ),
                       ),
                     ),
