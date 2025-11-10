@@ -5,6 +5,7 @@ import '../widgets/ranking_list.dart';
 import '../widgets/job_selector.dart';
 import '../widgets/awakening_selector.dart';
 import '../../character/presentation/widgets/character_detail_view.dart';
+import '../../../core/theme/app_spacing.dart'; // 공용 spacing
 
 class RankingScreen extends StatefulWidget {
   const RankingScreen({super.key});
@@ -67,58 +68,50 @@ class _RankingScreenState extends State<RankingScreen> {
     final jobs = JobData.getJobs();
     final awakenings = JobData.getAwakenings(_selectedJob);
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF6F6F6),
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.all(12),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  _buildRankTypeSelector(),
-                  const SizedBox(height: 16),
-                  JobSelector(
-                    jobs: jobs,
-                    selectedJob: _selectedJob,
-                    onJobSelected: _onJobSelected,
-                  ),
-                  const SizedBox(height: 20),
-                  if (_selectedJob != null)
-                    AwakeningSelector(
-                      job: _selectedJob!,
-                      awakenings: awakenings,
-                      selectedAwakening: _selectedAwakening,
-                      onAwakeningSelected: _onAwakeningSelected,
-                    ),
-                  const SizedBox(height: 12),
-                  if (_selectedJob != null && _selectedAwakening != null)
-                    RankingList(
-                      job: _selectedJob!,
-                      awakening: _selectedAwakening!,
-                      rankingData: _dummyRankingData,
-                      onTapCharacter: (character) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => CharacterDetailView(
-                              character: character,
-                              fromRanking: true, // ✅ 핵심
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                ]),
-              ),
+    // BaseScreen이 이미 바깥에서 16px 패딩 제공 중
+    return SingleChildScrollView(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildRankTypeSelector(),
+          const SizedBox(height: AppSpacing.md),
+          JobSelector(
+            jobs: jobs,
+            selectedJob: _selectedJob,
+            onJobSelected: _onJobSelected,
+          ),
+          const SizedBox(height: AppSpacing.lg),
+          if (_selectedJob != null)
+            AwakeningSelector(
+              job: _selectedJob!,
+              awakenings: awakenings,
+              selectedAwakening: _selectedAwakening,
+              onAwakeningSelected: _onAwakeningSelected,
             ),
-          ],
-        ),
+          const SizedBox(height: AppSpacing.md),
+          if (_selectedJob != null && _selectedAwakening != null)
+            RankingList(
+              job: _selectedJob!,
+              awakening: _selectedAwakening!,
+              rankingData: _dummyRankingData,
+              onTapCharacter: (character) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => CharacterDetailView(
+                      character: character,
+                      fromRanking: true,
+                    ),
+                  ),
+                );
+              },
+            ),
+          const SizedBox(height: AppSpacing.xl), // 바닥 숨쉬기
+        ],
       ),
     );
   }
 
-  /// 🔹 상단 랭크 타입 버튼
   Widget _buildRankTypeSelector() {
     return Row(
       children: rankTypes.map((type) {

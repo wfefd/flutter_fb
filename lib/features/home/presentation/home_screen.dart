@@ -1,5 +1,3 @@
-// lib/features/home/presentation/home_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:flutter_fb/features/home/widgets/custom_bottom_nav_bar.dart';
 import 'package:flutter_fb/features/home/widgets/custom_top_app_bar.dart';
@@ -11,6 +9,17 @@ import '../../community/presentation/community_list_screen.dart';
 import '../../ranking/presentation/ranking_screen.dart';
 import '../../../core/theme/app_colors.dart';
 import '../widgets/ranking_table_container.dart';
+
+/// 공통 패딩 적용용 베이스 위젯
+class BaseScreen extends StatelessWidget {
+  final Widget child;
+  const BaseScreen({super.key, required this.child});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(padding: const EdgeInsets.all(16.0), child: child);
+  }
+}
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -45,20 +54,35 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: TabBarView(
                 children: [
-                  // ✅ 홈탭: 캐릭터 검색 + 랭킹 블록
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.only(bottom: 24),
-                    child: Column(
-                      children: [
-                        const CharacterSearchTab(),
-                        WorldRankingBlock(rows: dummyRows), // ✅ 여기서 보임
-                      ],
+                  // 홈 탭
+                  BaseScreen(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          const CharacterSearchTab(),
+                          RankingTableContainer(
+                            titleDate: '11월 9일',
+                            serverName: '전체 서버',
+                            rows: dummyRows,
+                            onMoreTap: () {
+                              // "더 보기" 클릭 시 이동할 페이지
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => const RankingScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  const RankingScreen(),
-                  const AuctionScreen(),
-                  const CommunityListScreen(),
-                  const BoardListScreen(),
+                  // 나머지 탭들 전부 BaseScreen으로 감쌈
+                  const BaseScreen(child: RankingScreen()),
+                  const BaseScreen(child: AuctionScreen()),
+                  const BaseScreen(child: CommunityListScreen()),
+                  const BaseScreen(child: BoardListScreen()),
                 ],
               ),
             ),

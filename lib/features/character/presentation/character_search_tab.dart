@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'widgets/character_detail_view.dart';
 import 'widgets/character_search_result.dart';
-import 'widgets/character_search_input.dart';
+import '../../home/widgets/character_search_input_full.dart';
 
 class CharacterSearchTab extends StatefulWidget {
   const CharacterSearchTab({super.key});
@@ -81,26 +81,24 @@ class _CharacterSearchTabState extends State<CharacterSearchTab> {
       return CharacterDetailView(character: _selectedCharacter!);
     }
 
+    // ✅ SafeArea만 유지, 패딩 제거
     return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: _isSearching
-            ? CharacterSearchResult(
-                query: _controller.text,
-                results: _results,
-                onCharacterSelected: (c) {
-                  setState(() => _selectedCharacter = c);
-                },
-              )
-            : CharacterSearchInput(
-                selectedServer: _selectedServer,
-                servers: _servers,
-                controller: _controller,
-                onServerChanged: (value) =>
-                    setState(() => _selectedServer = value),
-                onSearch: _searchCharacter,
-              ),
-      ),
+      child: _isSearching
+          ? CharacterSearchResult(
+              query: _controller.text,
+              results: _results,
+              onCharacterSelected: (c) {
+                setState(() => _selectedCharacter = c);
+              },
+            )
+          : CharacterSearchInput(
+              selectedServer: _selectedServer,
+              servers: _servers,
+              controller: _controller,
+              onServerChanged: (value) =>
+                  setState(() => _selectedServer = value),
+              onSearch: _searchCharacter,
+            ),
     );
   }
 }

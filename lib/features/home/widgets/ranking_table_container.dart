@@ -1,134 +1,133 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_fb/core/widgets/section_container.dart';
 import 'package:flutter_fb/core/theme/app_colors.dart';
 import 'package:flutter_fb/core/theme/app_text_styles.dart';
 
-class WorldRankingBlock extends StatelessWidget {
+class RankingTableContainer extends StatelessWidget {
+  final String titleDate; // 예: '11월 9일'
+  final String serverName; // 예: '전체 서버'
   final List<Map<String, dynamic>> rows;
-  const WorldRankingBlock({super.key, required this.rows});
+  final VoidCallback? onMoreTap;
+
+  const RankingTableContainer({
+    super.key,
+    required this.titleDate,
+    required this.serverName,
+    required this.rows,
+    this.onMoreTap,
+  });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.border, width: 1),
+        border: Border.all(
+          color: AppColors.border,
+          width: 1,
+          strokeAlign: BorderSide.strokeAlignInside,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 제목 영역
+          // ✅ 제목 영역
           Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // ✅ "일반 월드"만 bold 처리
                 RichText(
                   text: TextSpan(
                     style: AppTextStyles.body1,
-                    children: const [
-                      TextSpan(text: '11월 9일 '),
+                    children: [
+                      TextSpan(text: '$titleDate '),
                       TextSpan(
-                        text: '전체 서버',
-                        style: TextStyle(fontWeight: FontWeight.w700),
+                        text: serverName,
+                        style: const TextStyle(fontWeight: FontWeight.w700),
                       ),
-                      TextSpan(text: ' 랭킹'),
+                      const TextSpan(text: ' 랭킹'),
                     ],
                   ),
                 ),
-                Row(
-                  children: [
-                    Text('더 보기', style: AppTextStyles.body1.copyWith()),
-                    const SizedBox(width: 4),
-                    const Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 14,
-                      color: AppColors.secondaryText,
-                    ),
-                  ],
+                GestureDetector(
+                  onTap: onMoreTap,
+                  child: Row(
+                    children: [
+                      Text(
+                        '더 보기',
+                        style: AppTextStyles.body1.copyWith(
+                          color: AppColors.secondaryText,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      const Icon(
+                        Icons.arrow_forward_ios_rounded,
+                        size: 14,
+                        color: AppColors.secondaryText,
+                      ),
+                    ],
+                  ),
                 ),
               ],
             ),
           ),
 
-          // ✅ 소제목 행
+          // ✅ 헤더 행
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             color: const Color(0xFFF7F7F7),
             child: Row(
-              children: [
+              children: const [
                 SizedBox(
-                  width: 14, // ✅ 순위 배지 영역과 맞춤 (22 + 여백 약간)
+                  width: 24,
                   child: Text(
                     '#',
                     textAlign: TextAlign.center,
-                    style: AppTextStyles.body2.copyWith(
-                      color: AppColors.primaryText,
-                    ),
+                    style: _headerStyle,
                   ),
                 ),
-                const SizedBox(width: 10), // ✅ 리스트의 배지-텍스트 간격과 동일하게 유지
-                Expanded(
-                  flex: 4,
-                  child: Text(
-                    '캐릭터',
-                    style: AppTextStyles.body2.copyWith(
-                      color: AppColors.primaryText,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 6), // ✅ 리스트의 배지-텍스트 간격과 동일하게 유지
-
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    '레벨',
-                    style: AppTextStyles.body2.copyWith(
-                      color: AppColors.primaryText,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 2), // ✅ 리스트의 배지-텍스트 간격과 동일하게 유지
-
+                Expanded(flex: 4, child: Text('캐릭터', style: _headerStyle)),
+                Expanded(flex: 2, child: Text('명성', style: _headerStyle)),
                 Expanded(
                   flex: 3,
-                  child: Text(
-                    '직업',
-                    textAlign: TextAlign.end,
-                    style: AppTextStyles.body2.copyWith(
-                      color: AppColors.primaryText,
-                    ),
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: Text('직업', style: _headerStyle),
                   ),
                 ),
               ],
             ),
           ),
 
-          // ✅ 순위 리스트
+          const Divider(height: 1, color: Color(0xFFEAEAEA)),
+
+          // ✅ 데이터 리스트
           Column(
             children: rows.map((e) {
+              final rank = e['rank'] as int;
+              final name = e['name'] as String;
+              final level = e['level'] as int;
+              final job = e['job'] as String;
+
               return Column(
                 children: [
                   Container(
                     padding: const EdgeInsets.symmetric(
-                      vertical: 6, // 🔽 기존 12 → 6
-                      horizontal: 10,
+                      vertical: 6,
+                      horizontal: 16,
                     ),
                     child: Row(
                       children: [
                         SizedBox(
-                          width: 22, // 🔽 배지 크기 축소
+                          width: 24,
                           height: 26,
-                          child: _RankBadge(rank: e['rank'] as int),
+                          child: _RankBadge(rank: rank),
                         ),
-                        const SizedBox(width: 8), // 🔹 배지-텍스트 간 간격 추가
                         Expanded(
                           flex: 4,
                           child: Text(
-                            e['name'],
+                            name,
                             style: AppTextStyles.body2.copyWith(
                               color: AppColors.primaryText,
                             ),
@@ -137,7 +136,7 @@ class WorldRankingBlock extends StatelessWidget {
                         Expanded(
                           flex: 2,
                           child: Text(
-                            '${e['level']}',
+                            '$level',
                             style: AppTextStyles.body2.copyWith(
                               color: AppColors.secondaryText,
                             ),
@@ -145,11 +144,13 @@ class WorldRankingBlock extends StatelessWidget {
                         ),
                         Expanded(
                           flex: 3,
-                          child: Text(
-                            e['job'],
-                            textAlign: TextAlign.end,
-                            style: AppTextStyles.body2.copyWith(
-                              color: AppColors.secondaryText,
+                          child: Align(
+                            alignment: Alignment.centerRight,
+                            child: Text(
+                              job,
+                              style: AppTextStyles.body2.copyWith(
+                                color: AppColors.secondaryText,
+                              ),
                             ),
                           ),
                         ),
@@ -176,17 +177,9 @@ class _RankBadge extends StatelessWidget {
     Color color;
     switch (rank) {
       case 1:
-        color = AppColors.secondaryText; // gold
-        break;
       case 2:
-        color = AppColors.secondaryText; // gold
-        // gold
-        // silver
-        break;
       case 3:
-        color = AppColors.secondaryText; // gold
-        // gold
-        // bronze
+        color = AppColors.secondaryText;
         break;
       default:
         color = Colors.white;
@@ -202,7 +195,7 @@ class _RankBadge extends StatelessWidget {
       child: Text(
         '$rank',
         style: AppTextStyles.body2.copyWith(
-          fontSize: 11, // 🔽 글자 크기 약간 축소
+          fontSize: 11,
           color: rank <= 3 ? Colors.white : AppColors.secondaryText,
           fontWeight: FontWeight.w700,
         ),
@@ -210,3 +203,10 @@ class _RankBadge extends StatelessWidget {
     );
   }
 }
+
+// ✅ 헤더용 텍스트 스타일 상수
+const _headerStyle = TextStyle(
+  fontSize: 13,
+  fontWeight: FontWeight.w500,
+  color: AppColors.primaryText,
+);

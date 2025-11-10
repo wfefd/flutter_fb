@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_fb/core/theme/app_colors.dart';
 import '../data/job_image_map.dart';
-import 'selectable_image_card.dart';
+import '../../../core/widgets/custom_container_divided.dart';
 
 class AwakeningSelector extends StatelessWidget {
   final String job;
@@ -18,7 +19,6 @@ class AwakeningSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ 이미지 경로 미리 계산 (build 중 반복 연산 방지)
     final awakeningList = List.generate(
       awakenings.length,
       (i) => {
@@ -28,54 +28,71 @@ class AwakeningSelector extends StatelessWidget {
       },
     );
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: _boxDecoration,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            '각성 선택',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-          ),
-          const SizedBox(height: 8),
-
-          // ✅ shrinkWrap 제거 및 높이 지정 (성능 향상)
-          SizedBox(
-            height: 120, // 높이 고정으로 레이아웃 계산 최소화
-            child: GridView.builder(
-              itemCount: awakeningList.length,
-              physics: const ClampingScrollPhysics(),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 4,
-                mainAxisSpacing: 8,
-                crossAxisSpacing: 8,
-                childAspectRatio: 0.9,
-              ),
-              itemBuilder: (context, index) {
-                final awakening = awakeningList[index];
-                final isSelected = selectedAwakening == awakening['name'];
-
-                return SelectableImageCard(
-                  label: awakening['name']!,
-                  imagePath: awakening['imagePath']!,
-                  isSelected: isSelected,
-                  onTap: () => onAwakeningSelected(awakening['name']!),
-                );
-              },
-            ),
-          ),
-        ],
+    return CustomContainerDivided(
+      header: const Text(
+        '각성 선택',
+        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
       ),
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: awakeningList.map((awakening) {
+            final isSelected = selectedAwakening == awakening['name'];
+            return GestureDetector(
+              onTap: () => onAwakeningSelected(awakening['name']!),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 150),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? const Color(0xFF2F2F38)
+                      : const Color(0xFFF5F6F8),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: isSelected
+                        ? const Color(0xFF2F2F38)
+                        : Colors.grey.shade300,
+                    width: 1,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset(
+                      awakening['imagePath']!,
+                      width: 20,
+                      height: 20,
+                      fit: BoxFit.contain,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      awakening['name']!,
+                      style: TextStyle(
+                        color: isSelected
+                            ? Colors.white
+                            : const Color(0xFF333333),
+                        fontWeight: isSelected
+                            ? FontWeight.bold
+                            : FontWeight.w500,
+                        fontSize: 13,
+                      ),
+                    ),
+                    if (isSelected)
+                      const Padding(
+                        padding: EdgeInsets.only(left: 4),
+                        child: Icon(Icons.check, size: 16, color: Colors.white),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
     );
   }
-
-  // ✅ BoxDecoration 재사용 (매번 객체 생성 방지)
-  static final _boxDecoration = BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.circular(12),
-    boxShadow: [
-      BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2)),
-    ],
-  );
 }

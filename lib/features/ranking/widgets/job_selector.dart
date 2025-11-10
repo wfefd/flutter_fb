@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_fb/core/theme/app_colors.dart';
+import 'package:flutter_fb/core/theme/app_text_styles.dart';
+import 'package:flutter_fb/core/theme/app_spacing.dart';
 import '../data/job_image_map.dart';
 
 class JobSelector extends StatelessWidget {
@@ -16,129 +19,119 @@ class JobSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: _boxDecoration(),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: AppColors.border, width: 1),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            '직업 선택',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-          ),
-          const SizedBox(height: 8),
-
-          // ✅ 높이를 “1.5줄” 정도로 제한
-          SizedBox(
-            height: 160,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: ScrollConfiguration(
-                behavior: const ScrollBehavior().copyWith(overscroll: false),
-                child: GridView.builder(
-                  itemCount: jobs.length,
-                  physics: const ClampingScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 4,
-                    mainAxisSpacing: 8,
-                    crossAxisSpacing: 8,
-                    childAspectRatio: 0.9,
+          // ✅ 헤더
+          Padding(
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '직업 목록',
+                  style: AppTextStyles.body1.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.primaryText,
                   ),
-                  itemBuilder: (context, index) {
-                    final job = jobs[index];
-                    final isSelected = selectedJob == job;
-                    return _JobCard(
-                      job: job,
-                      isSelected: isSelected,
-                      onTap: () => onJobSelected(job),
-                    );
-                  },
                 ),
-              ),
+                Row(
+                  children: [
+                    Text(
+                      '더 보기',
+                      style: AppTextStyles.body1.copyWith(
+                        color: AppColors.secondaryText,
+                      ),
+                    ),
+                    const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 14,
+                      color: AppColors.secondaryText,
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+
+          // ✅ Divider
+          const Divider(height: 1, color: AppColors.border),
+
+          // ✅ 본문
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppSpacing.xs,
+              0, // Divider와 너무 띄워지지 않게
+              AppSpacing.xs,
+              AppSpacing.xs,
+            ),
+            child: Wrap(
+              spacing: AppSpacing.xs, // 가로 간격
+              runSpacing: AppSpacing.xs, // 세로 간격
+              children: jobs.map((job) {
+                final isSelected = selectedJob == job;
+                return GestureDetector(
+                  onTap: () => onJobSelected(job),
+                  child: SizedBox(
+                    width: 60, // 한 칸 고정 폭
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // ✅ 이미지 박스
+                        Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: isSelected
+                                  ? AppColors.secondaryText
+                                  : Colors.transparent,
+                              width: isSelected ? 2 : 0,
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: Image.asset(
+                              'assets/images/jobs/${JobImageMap.getJobIcon(job)}',
+                              width: 42,
+                              height: 42,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(
+                                    Icons.person,
+                                    size: 40,
+                                    color: AppColors.secondaryText,
+                                  ),
+                            ),
+                          ),
+                        ),
+
+                        // ✅ 직업명
+                        Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            job,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTextStyles.body2.copyWith(
+                              fontSize: 11,
+                              color: AppColors.primaryText,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  BoxDecoration _boxDecoration() => BoxDecoration(
-    color: Colors.white,
-    borderRadius: BorderRadius.circular(12),
-    boxShadow: [
-      BoxShadow(
-        color: Colors.black.withOpacity(0.05),
-        blurRadius: 5,
-        offset: const Offset(0, 2),
-      ),
-    ],
-  );
-}
-
-/// 🔹 내부 전용 JobCard (RepaintBoundary 포함)
-class _JobCard extends StatelessWidget {
-  final String job;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  const _JobCard({
-    required this.job,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: RepaintBoundary(
-        child: Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? const Color(0xFF7BC57B).withOpacity(0.15)
-                : Colors.white,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: isSelected
-                  ? const Color(0xFF7BC57B)
-                  : Colors.grey.shade300,
-              width: isSelected ? 2 : 1,
-            ),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black12,
-                blurRadius: 3,
-                offset: Offset(1, 2),
-              ),
-            ],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(8),
-                child: Image.asset(
-                  'assets/images/jobs/${JobImageMap.getJobIcon(job)}',
-                  width: 48,
-                  height: 48,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.person, size: 48, color: Colors.grey),
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                job,
-                style: TextStyle(
-                  color: isSelected ? const Color(0xFF4CAF50) : Colors.black87,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  fontSize: 12,
-                ),
-                overflow: TextOverflow.ellipsis,
-              ),
-            ],
-          ),
-        ),
       ),
     );
   }

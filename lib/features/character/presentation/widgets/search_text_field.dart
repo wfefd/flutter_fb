@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_spacing.dart';
 
 class SearchTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -35,9 +35,7 @@ class SearchTextField extends StatelessWidget {
                     color: AppColors.secondaryText,
                   ),
                   border: InputBorder.none,
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.md,
-                  ),
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
                 ),
               ),
             ),
