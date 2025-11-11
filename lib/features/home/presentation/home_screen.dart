@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_fb/features/home/widgets/custom_bottom_nav_bar.dart';
 import 'package:flutter_fb/features/home/widgets/custom_top_app_bar.dart';
 import 'package:flutter_fb/features/home/widgets/custom_tab_bar.dart';
-import '../../character/presentation/character_search_tab.dart';
+import '../../character/presentation/pages/character_search_tab.dart';
 import '../../auction/presentation/auction_screen.dart';
 import '../../board/presentation/board_list_screen.dart';
 import '../../community/presentation/community_list_screen.dart';
-import '../../ranking/presentation/ranking_screen.dart';
+import '../../ranking/presentation/pages/ranking_screen.dart';
 import '../../../core/theme/app_colors.dart';
 
 class BaseScreen extends StatelessWidget {
@@ -15,7 +15,13 @@ class BaseScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(padding: const EdgeInsets.all(16.0), child: child);
+    // CharacterSearchTab일 때는 패딩 없애기
+    final bool isCharacterTab = child is CharacterSearchTab;
+
+    return Padding(
+      padding: isCharacterTab ? EdgeInsets.zero : const EdgeInsets.all(16.0),
+      child: child,
+    );
   }
 }
 

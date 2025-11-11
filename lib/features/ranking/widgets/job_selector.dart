@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_fb/core/theme/app_colors.dart';
 import 'package:flutter_fb/core/theme/app_text_styles.dart';
 import 'package:flutter_fb/core/theme/app_spacing.dart';
+import '../../../../core/widgets/custom_container_divided.dart';
 import '../data/job_image_map.dart';
 
 class JobSelector extends StatelessWidget {
@@ -18,110 +19,83 @@ class JobSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.border, width: 1),
+    return CustomContainerDivided(
+      header: const Text(
+        '직업 선택',
+        style: TextStyle(
+          // fontWeight: FontWeight.bold,
+          color: AppColors.primaryText,
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // ✅ 헤더
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '직업 목록',
-                  style: AppTextStyles.body1.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.primaryText,
-                  ),
-                ),
-                Row(
-                  children: [
-                    Text(
-                      '더 보기',
-                      style: AppTextStyles.body1.copyWith(
-                        color: AppColors.secondaryText,
-                      ),
-                    ),
-                    const Icon(
-                      Icons.arrow_forward_ios_rounded,
-                      size: 14,
-                      color: AppColors.secondaryText,
-                    ),
-                  ],
-                ),
-              ],
-            ),
+      children: [
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.5, // 최대 높이만 제한
           ),
-
-          // ✅ Divider
-          const Divider(height: 1, color: AppColors.border),
-
-          // ✅ 본문
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.xs,
-              0, // Divider와 너무 띄워지지 않게
-              AppSpacing.xs,
-              AppSpacing.xs,
-            ),
+          child: SingleChildScrollView(
             child: Wrap(
-              spacing: AppSpacing.xs, // 가로 간격
-              runSpacing: AppSpacing.xs, // 세로 간격
+              spacing: AppSpacing.sm,
+              runSpacing: AppSpacing.sm,
               children: jobs.map((job) {
                 final isSelected = selectedJob == job;
+
                 return GestureDetector(
                   onTap: () => onJobSelected(job),
-                  child: SizedBox(
-                    width: 60, // 한 칸 고정 폭
-                    child: Column(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: isSelected
+                          ? AppColors.primaryText.withOpacity(0.9)
+                          : AppColors.surface,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: isSelected
+                            ? Colors.transparent
+                            : AppColors.border,
+                      ),
+                      boxShadow: isSelected
+                          ? [
+                              BoxShadow(
+                                color: AppColors.primaryText.withOpacity(0.15),
+                                blurRadius: 4,
+                                offset: const Offset(0, 2),
+                              ),
+                            ]
+                          : [],
+                    ),
+                    child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        // ✅ 이미지 박스
-                        Container(
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(8),
-                            border: Border.all(
-                              color: isSelected
-                                  ? AppColors.secondaryText
-                                  : Colors.transparent,
-                              width: isSelected ? 2 : 0,
-                            ),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(6),
-                            child: Image.asset(
-                              'assets/images/jobs/${JobImageMap.getJobIcon(job)}',
-                              width: 42,
-                              height: 42,
-                              fit: BoxFit.cover,
-                              errorBuilder: (context, error, stackTrace) =>
-                                  const Icon(
-                                    Icons.person,
-                                    size: 40,
-                                    color: AppColors.secondaryText,
-                                  ),
-                            ),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(6),
+                          child: Image.asset(
+                            'assets/images/jobs/${JobImageMap.getJobIcon(job)}',
+                            width: 26,
+                            height: 26,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) =>
+                                const Icon(
+                                  Icons.person,
+                                  size: 24,
+                                  color: AppColors.secondaryText,
+                                ),
                           ),
                         ),
-
-                        // ✅ 직업명
-                        Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text(
-                            job,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.body2.copyWith(
-                              fontSize: 11,
-                              color: AppColors.primaryText,
-                            ),
-                            textAlign: TextAlign.center,
+                        const SizedBox(width: 6),
+                        Text(
+                          job,
+                          style: AppTextStyles.body1.copyWith(
+                            fontSize: 13,
+                            color: isSelected
+                                ? Colors.white
+                                : AppColors.primaryText,
+                            fontWeight: isSelected
+                                ? FontWeight.bold
+                                : FontWeight.w500,
                           ),
                         ),
                       ],
@@ -131,8 +105,8 @@ class JobSelector extends StatelessWidget {
               }).toList(),
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

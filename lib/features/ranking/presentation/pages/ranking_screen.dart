@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import '../data/job_data.dart';
-import '../widgets/ranking_list.dart';
-import '../widgets/job_selector.dart';
-import '../widgets/server_selector.dart'; // 🔹 추가
-import '../../character/presentation/widgets/character_detail_view.dart';
-import '../../../core/theme/app_spacing.dart';
-import '../../../core/theme/app_colors.dart';
-import '../widgets/awakening_selector.dart';
+import '../../data/job_data.dart';
+import '../../widgets/ranking_list.dart';
+import '../../widgets/job_selector.dart';
+import '../../widgets/server_selector.dart'; // 🔹 추가
+import '../../../character/presentation/pages/character_detail_view.dart';
+import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../widgets/awakening_selector.dart';
 
 class RankingScreen extends StatefulWidget {
   const RankingScreen({super.key});
@@ -85,8 +85,6 @@ class _RankingScreenState extends State<RankingScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: AppSpacing.md),
-
             // 🔹 서버 선택 섹션
             ServerSelector(
               servers: _servers,

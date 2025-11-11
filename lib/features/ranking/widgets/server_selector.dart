@@ -23,14 +23,7 @@ class _ServerSelectorState extends State<ServerSelector> {
   @override
   Widget build(BuildContext context) {
     return CustomContainerDivided(
-      header: const Text(
-        "서버 선택",
-        style: TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.bold,
-          color: AppColors.primaryText,
-        ),
-      ),
+      header: const Text("서버 선택"),
       children: [
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -53,7 +46,7 @@ class _ServerSelectorState extends State<ServerSelector> {
                               0.9,
                             ) // 선택 시 진한 텍스트색 기반 강조
                           : AppColors.surface, // 기본 배경색
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isSelected
                             ? Colors.transparent

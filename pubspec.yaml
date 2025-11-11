@@ -27,20 +27,26 @@ dev_dependencies:
 
   # 권장 린트 규칙
   flutter_lints: ^6.0.0
+
 flutter:
-  # 📦 기본 머티리얼 아이콘 사용
   uses-material-design: true
 
-  # 🖼️ 프로젝트에 포함된 이미지 리소스 (assets)
   assets:
+    # 📂 폰트 및 이미지 폴더
     - assets/fonts/
     - assets/images/
     - assets/images/jobs/
     - assets/images/items/
+
+    # 🔹 주요 이미지
     - assets/images/logo_done.png
     - assets/images/logo_done_big.png
     - assets/images/fame.png
     - assets/images/sample_weapon.png
+
+    # 🔹 스탯 아이콘 폴더 전체
+    - assets/images/stat/
+
   fonts:
     - family: Pretendard
       fonts:
@@ -48,23 +54,10 @@ flutter:
         - asset: assets/fonts/Pretendard-Medium.ttf
         - asset: assets/fonts/Pretendard-SemiBold.ttf
         - asset: assets/fonts/Pretendard-Bold.ttf
-    # 예: assets/images/character1.png
-    #     assets/images/character2.png
-    #     assets/images/no_image.png
-
-  # ✏️ (선택) 커스텀 폰트 추가 예시
-  # fonts:
-  #   - family: NanumSquare
-  #     fonts:
-  #       - asset: assets/fonts/NanumSquare-Regular.ttf
-  #       - asset: assets/fonts/NanumSquare-Bold.ttf
-  #         weight: 700
 
 flutter_native_splash:
-  color: "#FFFFFF" # 배경색
-  image: assets/images/logo_done_big.png  # ✅ 띄울 로고 경로
-  android: true  # 안드로이드용 스플래시 생성
-  ios: true      # iOS용 스플래시 생성
-  web: false     # 웹 버전엔 적용 안 함
-
- 
+  color: "#FFFFFF"
+  image: assets/images/logo_done_big.png
+  android: true
+  ios: true
+  web: false

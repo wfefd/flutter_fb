@@ -20,14 +20,7 @@ class AwakeningSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return CustomContainerDivided(
-      header: const Text(
-        '각성 선택',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
-          color: AppColors.primaryText,
-        ),
-      ),
+      header: const Text('각성 선택', style: TextStyle()),
       children: [
         SingleChildScrollView(
           scrollDirection: Axis.horizontal,
@@ -48,7 +41,7 @@ class AwakeningSelector extends StatelessWidget {
                       color: isSelected
                           ? AppColors.primaryText.withOpacity(0.9)
                           : AppColors.surface,
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isSelected
                             ? Colors.transparent

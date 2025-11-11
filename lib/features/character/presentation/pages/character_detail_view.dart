@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
-import './equipment_tab.dart';
+import 'package:flutter_fb/core/theme/app_colors.dart';
+import 'package:flutter_fb/core/theme/app_text_styles.dart';
+import 'package:flutter_fb/features/character/presentation/widgets/buff_tab.dart';
+import 'package:flutter_fb/features/character/presentation/widgets/skill_bloom_tab.dart';
+import '../widgets/equipment_tab.dart';
+import '../widgets/stat_tab.dart';
+import '../widgets/detail_stat_tab.dart';
+import '../widgets/avatar_creature_tab.dart';
 
 class CharacterDetailView extends StatefulWidget {
   final Map<String, dynamic> character;
-  final bool fromRanking; // 🔹 랭킹에서 진입 여부
+  final bool fromRanking;
 
   const CharacterDetailView({
     super.key,
@@ -31,6 +38,7 @@ class _CharacterDetailViewState extends State<CharacterDetailView>
   ];
 
   final Map<int, Future<String>> _tabDataCache = {};
+  final List<Widget?> _builtTabs = List.filled(8, null);
 
   @override
   Widget build(BuildContext context) {
@@ -38,38 +46,33 @@ class _CharacterDetailViewState extends State<CharacterDetailView>
     final c = widget.character;
 
     return Scaffold(
-      backgroundColor: Colors.white,
-
-      // 🔹 랭킹에서 진입했을 때만 AppBar 보이게
+      backgroundColor: AppColors.background,
       appBar: widget.fromRanking
           ? AppBar(
-              title: Text(
-                c['name'] ?? '캐릭터 정보',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-              backgroundColor: const Color(0xFF7BC57B),
-              foregroundColor: Colors.white,
+              title: Text(c['name'] ?? '캐릭터 정보', style: AppTextStyles.h2),
+              backgroundColor: AppColors.surface,
+              foregroundColor: AppColors.primaryText,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new),
+                iconSize: 18, // 👈 아이콘 크기 줄이기
                 onPressed: () => Navigator.pop(context),
               ),
-              elevation: 2,
+              elevation: 1,
             )
           : null,
 
       body: Column(
         children: [
           _buildCharacterInfo(c),
-          const Divider(height: 1),
+          Divider(height: 1, color: AppColors.border),
           _buildTabSelector(),
-          const Divider(height: 1),
+          Divider(height: 1, color: AppColors.border),
           Expanded(child: _buildTabContent()),
         ],
       ),
     );
   }
 
-  /// 🔹 캐릭터 기본 정보
   Widget _buildCharacterInfo(Map<String, dynamic> c) {
     return Padding(
       padding: const EdgeInsets.all(12),
@@ -90,32 +93,27 @@ class _CharacterDetailViewState extends State<CharacterDetailView>
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  c['name'] ?? 'Unknown',
-                  style: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                Text(c['name'] ?? 'Unknown', style: AppTextStyles.h1),
+                const SizedBox(height: 4),
                 Text(
                   '${c['class'] ?? ''} | ${c['server'] ?? ''}',
-                  style: const TextStyle(color: Colors.grey),
+                  style: AppTextStyles.body2,
                 ),
                 const SizedBox(height: 6),
-                Text('Lv.${c['level'] ?? 0}'),
+                Text('Lv.${c['level'] ?? 0}', style: AppTextStyles.body1),
                 const SizedBox(height: 6),
                 Row(
                   children: [
                     Image.asset(
                       'assets/images/fame.png',
-                      width: 22,
-                      height: 22,
+                      width: 24,
+                      height: 24,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       c['power'] ?? '0',
-                      style: const TextStyle(
-                        color: Colors.amber,
+                      style: AppTextStyles.subtitle.copyWith(
+                        color: AppColors.secondaryText,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -129,7 +127,6 @@ class _CharacterDetailViewState extends State<CharacterDetailView>
     );
   }
 
-  /// 🔹 탭 선택 바
   Widget _buildTabSelector() {
     return Wrap(
       spacing: 1,
@@ -142,15 +139,16 @@ class _CharacterDetailViewState extends State<CharacterDetailView>
           child: InkWell(
             onTap: () => setState(() => _selectedTabIndex = index),
             child: Container(
-              color: isSelected ? const Color(0xFF7BC57B) : Colors.white,
+              color: isSelected ? AppColors.primaryText : AppColors.surface,
               alignment: Alignment.center,
               child: Text(
                 tabs[index],
-                style: TextStyle(
-                  color: isSelected ? Colors.white : Colors.black87,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  fontSize: 13,
-                ),
+                style: isSelected
+                    ? AppTextStyles.body1.copyWith(color: Colors.white)
+                    : AppTextStyles.body2.copyWith(
+                        color: AppColors.primaryText,
+                        fontWeight: FontWeight.w500,
+                      ),
               ),
             ),
           ),
@@ -159,48 +157,60 @@ class _CharacterDetailViewState extends State<CharacterDetailView>
     );
   }
 
-  /// 🔹 탭 내용 (IndexedStack + Lazy Loading)
-
   Widget _buildTabContent() {
     return IndexedStack(
       index: _selectedTabIndex,
-      children: List.generate(tabs.length, (i) {
-        if (i == 0) return const EquipmentTab(); // 장착장비 탭
-        _tabDataCache[i] ??= _loadTabData(i);
-        return FutureBuilder<String>(
-          future: _tabDataCache[i],
+      children: List.generate(tabs.length, (i) => _getTab(i)),
+    );
+  }
+
+  Widget _getTab(int i) {
+    if (_builtTabs[i] != null) return _builtTabs[i]!;
+
+    switch (i) {
+      case 0:
+        _builtTabs[i] = EquipmentTab();
+        break;
+      case 1:
+        _builtTabs[i] = const StatTab();
+        break;
+      case 2:
+        _builtTabs[i] = const DetailStatTab();
+        break;
+      case 3:
+        _builtTabs[i] = const AvatarCreatureTab();
+        break;
+      case 4:
+        _builtTabs[i] = const BuffTab();
+        break;
+      case 5:
+        _builtTabs[i] = const SkillBloomTab();
+        break;
+      default:
+        _builtTabs[i] = FutureBuilder<String>(
+          future: _tabDataCache.putIfAbsent(i, () => _loadTabData(i)),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
-              return const Center(child: Text('데이터 로드 실패'));
+              return Center(
+                child: Text('데이터 로드 실패', style: AppTextStyles.body2),
+              );
             }
             return Center(
-              child: Text(snapshot.data!, style: const TextStyle(fontSize: 16)),
+              child: Text(snapshot.data!, style: AppTextStyles.body1),
             );
           },
         );
-      }),
-    );
+    }
+
+    return _builtTabs[i]!;
   }
 
-  /// 🔹 탭별 비동기 데이터 로딩 (예시)
   Future<String> _loadTabData(int index) async {
-    await Future.delayed(const Duration(milliseconds: 600)); // 로딩 시뮬레이션
+    await Future.delayed(const Duration(milliseconds: 600));
     switch (index) {
-      case 0:
-        return '장착장비 데이터 로드 완료';
-      case 1:
-        return '스탯 정보 로드 완료';
-      case 2:
-        return '세부스탯 데이터 로드 완료';
-      case 3:
-        return '아바타 & 크리쳐 정보 로드 완료';
-      case 4:
-        return '버프 강화 데이터 로드 완료';
-      case 5:
-        return '스킬 개화 정보 로드 완료';
       case 6:
         return '딜표 데이터 로드 완료';
       case 7:

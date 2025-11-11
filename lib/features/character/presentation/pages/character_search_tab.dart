@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../ranking/presentation/ranking_screen.dart';
-import '../../home/widgets/ranking_table_container.dart';
-import 'widgets/character_search_input_full.dart';
-import 'widgets/character_search_result.dart';
-import 'widgets/character_detail_view.dart';
+import '../../../ranking/presentation/pages/ranking_screen.dart';
+import '../../../home/widgets/ranking_table_container.dart';
+import '../widgets/character_search_input_full.dart';
+import 'character_search_result.dart';
+import 'character_detail_view.dart';
 
 class CharacterSearchTab extends StatefulWidget {
   const CharacterSearchTab({super.key});

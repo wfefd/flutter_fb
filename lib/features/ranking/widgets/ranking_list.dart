@@ -21,11 +21,7 @@ class RankingList extends StatelessWidget {
     return CustomContainerWithSubtitle(
       header: const Text(
         '순위표',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          fontSize: 16,
-          color: AppColors.primaryText,
-        ),
+        style: TextStyle(fontSize: 14, color: AppColors.primaryText),
       ),
       subtitle: const Row(
         children: [
