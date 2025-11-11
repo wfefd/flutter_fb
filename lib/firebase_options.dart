@@ -41,46 +41,49 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCfbYhF4BbxE5CJImsRPQWvFMUxonogqGg',
-    appId: '1:492477408603:web:914d53dbe6f938b2dde67e',
-    messagingSenderId: '492477408603',
-    projectId: 'flutter-lecture2-2025-xyz',
-    authDomain: 'flutter-lecture2-2025-xyz.firebaseapp.com',
-    storageBucket: 'flutter-lecture2-2025-xyz.firebasestorage.app',
+    apiKey: 'AIzaSyAPMVEAuwd97ZFBgMV1Lv2Dwzj2FYVwY2k',
+    appId: '1:137298359155:web:2fd8733aa47992f2444b06',
+    messagingSenderId: '137298359155',
+    projectId: 'opensource-20200548',
+    authDomain: 'opensource-20200548.firebaseapp.com',
+    storageBucket: 'opensource-20200548.firebasestorage.app',
+    measurementId: 'G-Z1W8LMTH58',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyB4ptUmX9wtQj1umubkRXxIdESYDO2B8yI',
-    appId: '1:492477408603:android:c97f9fb2e4984fb3dde67e',
-    messagingSenderId: '492477408603',
-    projectId: 'flutter-lecture2-2025-xyz',
-    storageBucket: 'flutter-lecture2-2025-xyz.firebasestorage.app',
+    apiKey: 'AIzaSyBB7YVttAQk6NgM5m2LhYkMRxvkxSKbo48',
+    appId: '1:137298359155:android:39c16a2c7163901d444b06',
+    messagingSenderId: '137298359155',
+    projectId: 'opensource-20200548',
+    storageBucket: 'opensource-20200548.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDDlOtrk61FfTZLoSKWiJVNifopRrWf02g',
-    appId: '1:492477408603:ios:af382ababc12c992dde67e',
-    messagingSenderId: '492477408603',
-    projectId: 'flutter-lecture2-2025-xyz',
-    storageBucket: 'flutter-lecture2-2025-xyz.firebasestorage.app',
+    apiKey: 'AIzaSyC6-SmVQvoPbs0C4IqmlcMQCXHRF8HemYY',
+    appId: '1:137298359155:ios:ec501c1b292b7d48444b06',
+    messagingSenderId: '137298359155',
+    projectId: 'opensource-20200548',
+    storageBucket: 'opensource-20200548.firebasestorage.app',
     iosBundleId: 'com.example.flutterFb',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyDDlOtrk61FfTZLoSKWiJVNifopRrWf02g',
-    appId: '1:492477408603:ios:af382ababc12c992dde67e',
-    messagingSenderId: '492477408603',
-    projectId: 'flutter-lecture2-2025-xyz',
-    storageBucket: 'flutter-lecture2-2025-xyz.firebasestorage.app',
+    apiKey: 'AIzaSyC6-SmVQvoPbs0C4IqmlcMQCXHRF8HemYY',
+    appId: '1:137298359155:ios:ec501c1b292b7d48444b06',
+    messagingSenderId: '137298359155',
+    projectId: 'opensource-20200548',
+    storageBucket: 'opensource-20200548.firebasestorage.app',
     iosBundleId: 'com.example.flutterFb',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCfbYhF4BbxE5CJImsRPQWvFMUxonogqGg',
-    appId: '1:492477408603:web:e027c4702035faf9dde67e',
-    messagingSenderId: '492477408603',
-    projectId: 'flutter-lecture2-2025-xyz',
-    authDomain: 'flutter-lecture2-2025-xyz.firebaseapp.com',
-    storageBucket: 'flutter-lecture2-2025-xyz.firebasestorage.app',
+    apiKey: 'AIzaSyAPMVEAuwd97ZFBgMV1Lv2Dwzj2FYVwY2k',
+    appId: '1:137298359155:web:53a5279092df9bba444b06',
+    messagingSenderId: '137298359155',
+    projectId: 'opensource-20200548',
+    authDomain: 'opensource-20200548.firebaseapp.com',
+    storageBucket: 'opensource-20200548.firebasestorage.app',
+    measurementId: 'G-12KQPMPG3T',
   );
+
 }
