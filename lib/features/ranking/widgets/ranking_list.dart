@@ -1,159 +1,134 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_fb/core/theme/app_colors.dart';
-import 'package:flutter_fb/core/theme/app_text_styles.dart';
-import 'package:flutter_fb/core/theme/app_spacing.dart';
-import 'package:flutter_fb/core/widgets/custom_container_with_subtitle.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/custom_container_with_subtitle.dart';
 
 class RankingList extends StatelessWidget {
   final String job;
   final String awakening;
   final List<Map<String, dynamic>> rankingData;
-  final Function(Map<String, dynamic>)? onTapCharacter;
+  final Function(Map<String, dynamic>) onTapCharacter;
 
   const RankingList({
     super.key,
     required this.job,
     required this.awakening,
     required this.rankingData,
-    this.onTapCharacter,
+    required this.onTapCharacter,
   });
 
   @override
   Widget build(BuildContext context) {
     return CustomContainerWithSubtitle(
-      header: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      header: const Text(
+        '순위표',
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          fontSize: 16,
+          color: AppColors.primaryText,
+        ),
+      ),
+      subtitle: const Row(
         children: [
-          Text(
-            '$job > $awakening 랭킹',
-            style: AppTextStyles.body1.copyWith(
-              fontWeight: FontWeight.bold,
-              color: AppColors.primaryText,
-            ),
-          ),
-          Opacity(opacity: 0.3),
+          SizedBox(width: 32, child: Text('#', style: _subtitleStyle)),
+          Expanded(child: Text('캐릭터', style: _subtitleStyle)),
         ],
       ),
-
-      // ✅ 소제목 영역 (회색 배경)
-      subtitle: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            '순위 / 캐릭터',
-            style: AppTextStyles.body2.copyWith(color: AppColors.secondaryText),
-          ),
-          Text(
-            '명성',
-            style: AppTextStyles.body2.copyWith(color: AppColors.secondaryText),
-          ),
-        ],
-      ),
-
-      // ✅ 본문 영역
-      children: [
-        ...rankingData.asMap().entries.map((entry) {
-          final player = entry.value;
-          final rank = player['rank'] as int;
-          final isTop3 = rank <= 3;
-
-          return Padding(
-            padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-            child: GestureDetector(
-              onTap: () => onTapCharacter?.call(player),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md,
-                  vertical: AppSpacing.sm,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      offset: const Offset(0, 2),
-                      blurRadius: 4,
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        _RankBadge(rank: rank),
-                        const SizedBox(width: AppSpacing.sm),
-                        Text(
-                          player['name'],
-                          style: AppTextStyles.body1.copyWith(
-                            color: AppColors.primaryText,
-                            fontWeight: isTop3
-                                ? FontWeight.w700
-                                : FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                    Text(
-                      '명성 ${player['score']}',
-                      style: AppTextStyles.body2.copyWith(
-                        color: AppColors.secondaryText,
+      children: rankingData.map((character) {
+        return InkWell(
+          onTap: () => onTapCharacter(character),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // 🔹 순위
+                SizedBox(
+                  width: 32,
+                  child: Center(
+                    child: Text(
+                      '${character['rank']}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primaryText,
+                        fontSize: 14,
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
+                const SizedBox(width: 8),
+
+                // 🔹 캐릭터 정보
+                Expanded(
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: Image.asset(
+                          character['image'] ?? 'assets/images/no_image.png',
+                          width: 44,
+                          height: 44,
+                          fit: BoxFit.cover,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              character['name'] ?? 'Unknown',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                                color: AppColors.primaryText,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Lv.${character['level']} | ${character['server']} | ${character['class']}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: AppColors.secondaryText,
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 4),
+                            Row(
+                              children: [
+                                Image.asset(
+                                  'assets/images/fame.png',
+                                  width: 16,
+                                  height: 16,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  character['power'] ?? '-',
+                                  style: const TextStyle(
+                                    color: Colors.amber,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-          );
-        }),
-      ],
+          ),
+        );
+      }).toList(),
     );
   }
 }
 
-/// ✅ 순위 뱃지
-class _RankBadge extends StatelessWidget {
-  final int rank;
-  const _RankBadge({required this.rank});
-
-  @override
-  Widget build(BuildContext context) {
-    final bool isTop3 = rank <= 3;
-
-    Color bgColor;
-    switch (rank) {
-      case 1:
-        bgColor = const Color(0xFFFFD700); // gold
-        break;
-      case 2:
-        bgColor = const Color(0xFFC0C0C0); // silver
-        break;
-      case 3:
-        bgColor = const Color(0xFFCD7F32); // bronze
-        break;
-      default:
-        bgColor = AppColors.border;
-    }
-
-    return Container(
-      width: 24,
-      height: 24,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: isTop3 ? bgColor.withOpacity(0.9) : AppColors.surface,
-        borderRadius: BorderRadius.circular(6),
-        border: Border.all(
-          color: isTop3 ? Colors.transparent : AppColors.border,
-        ),
-      ),
-      child: Text(
-        '$rank',
-        style: AppTextStyles.body2.copyWith(
-          color: isTop3 ? Colors.white : AppColors.secondaryText,
-          fontWeight: FontWeight.w700,
-        ),
-      ),
-    );
-  }
-}
+const _subtitleStyle = TextStyle(
+  fontWeight: FontWeight.bold,
+  fontSize: 13,
+  color: AppColors.secondaryText,
+);

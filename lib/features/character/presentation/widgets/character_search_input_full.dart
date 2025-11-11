@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
-class CharacterSearchInput extends StatelessWidget {
+class CharacterSearchInputFull extends StatelessWidget {
   final String selectedServer;
   final List<String> servers;
   final TextEditingController controller;
   final ValueChanged<String> onServerChanged;
   final VoidCallback onSearch;
 
-  const CharacterSearchInput({
+  const CharacterSearchInputFull({
     super.key,
     required this.selectedServer,
     required this.servers,
@@ -18,25 +18,31 @@ class CharacterSearchInput extends StatelessWidget {
     required this.onSearch,
   });
 
+  void _handleSearch(BuildContext context) {
+    final name = controller.text.trim();
+    if (name.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('캐릭터 이름을 입력하세요.')));
+      return;
+    }
+    onSearch(); // ✅ CharacterSearchTab의 _searchCharacter 호출
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        // ✅ 로고
         Image.asset('assets/images/logo_done_big.png', height: 180),
-
         const SizedBox(height: 24),
-
-        // ✅ 감싸던 Container 완전히 제거
         Row(
           children: [
-            // ✅ 서버 선택 드롭다운
             Container(
               height: 44,
               padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
-                color: AppColors.surface, // ✅ surface 색상으로 변경
+                color: AppColors.surface,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: DropdownButtonHideUnderline(
@@ -47,7 +53,7 @@ class CharacterSearchInput extends StatelessWidget {
                     color: AppColors.secondaryText,
                   ),
                   style: AppTextStyles.body1.copyWith(
-                    color: AppColors.primaryText, // ✅ 텍스트색 변경
+                    color: AppColors.primaryText,
                   ),
                   onChanged: (value) {
                     if (value != null) onServerChanged(value);
@@ -58,10 +64,7 @@ class CharacterSearchInput extends StatelessWidget {
                 ),
               ),
             ),
-
             const SizedBox(width: 12),
-
-            // ✅ 캐릭터 검색 입력창
             Expanded(
               child: Container(
                 height: 44,
@@ -83,16 +86,16 @@ class CharacterSearchInput extends StatelessWidget {
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(
                             horizontal: 12,
-                            vertical: 11, // ✅ 수직 중앙 정렬
+                            vertical: 11,
                           ),
                         ),
-                        onSubmitted: (_) => onSearch(),
+                        onSubmitted: (_) => _handleSearch(context),
                       ),
                     ),
                     IconButton(
                       icon: const Icon(Icons.search),
                       color: AppColors.secondaryText,
-                      onPressed: onSearch,
+                      onPressed: () => _handleSearch(context),
                     ),
                   ],
                 ),
@@ -100,7 +103,6 @@ class CharacterSearchInput extends StatelessWidget {
             ),
           ],
         ),
-
         const SizedBox(height: 24),
       ],
     );

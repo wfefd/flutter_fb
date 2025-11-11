@@ -8,9 +8,7 @@ import '../../board/presentation/board_list_screen.dart';
 import '../../community/presentation/community_list_screen.dart';
 import '../../ranking/presentation/ranking_screen.dart';
 import '../../../core/theme/app_colors.dart';
-import '../widgets/ranking_table_container.dart';
 
-/// 공통 패딩 적용용 베이스 위젯
 class BaseScreen extends StatelessWidget {
   final Widget child;
   const BaseScreen({super.key, required this.child});
@@ -33,15 +31,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // ✅ 임시 데이터
-    final dummyRows = [
-      {'rank': 1, 'name': '오지환', 'level': 300, 'job': '키네시스'},
-      {'rank': 2, 'name': '버터', 'level': 300, 'job': '나이트로드'},
-      {'rank': 3, 'name': '테룡이', 'level': 300, 'job': '카이저'},
-      {'rank': 4, 'name': '솝상', 'level': 300, 'job': '비숍'},
-      {'rank': 5, 'name': '보마노랑이', 'level': 300, 'job': '보우마스터'},
-    ];
-
     return DefaultTabController(
       length: 5,
       child: Scaffold(
@@ -55,30 +44,10 @@ class _HomeScreenState extends State<HomeScreen> {
               child: TabBarView(
                 children: [
                   // 홈 탭
-                  BaseScreen(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        children: [
-                          const CharacterSearchTab(),
-                          RankingTableContainer(
-                            titleDate: '11월 9일',
-                            serverName: '전체 서버',
-                            rows: dummyRows,
-                            onMoreTap: () {
-                              // "더 보기" 클릭 시 이동할 페이지
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => const RankingScreen(),
-                                ),
-                              );
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
+                  const BaseScreen(
+                    child:
+                        CharacterSearchTab(), // ✅ 스크롤은 CharacterSearchTab 안에서 처리됨
                   ),
-                  // 나머지 탭들 전부 BaseScreen으로 감쌈
                   const BaseScreen(child: RankingScreen()),
                   const BaseScreen(child: AuctionScreen()),
                   const BaseScreen(child: CommunityListScreen()),

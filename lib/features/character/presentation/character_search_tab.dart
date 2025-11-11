@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'widgets/character_detail_view.dart';
+import '../../ranking/presentation/ranking_screen.dart';
+import '../../home/widgets/ranking_table_container.dart';
+import 'widgets/character_search_input_full.dart';
 import 'widgets/character_search_result.dart';
-import '../../home/widgets/character_search_input_full.dart';
+import 'widgets/character_detail_view.dart';
 
 class CharacterSearchTab extends StatefulWidget {
   const CharacterSearchTab({super.key});
@@ -10,12 +12,16 @@ class CharacterSearchTab extends StatefulWidget {
   State<CharacterSearchTab> createState() => _CharacterSearchTabState();
 }
 
-class _CharacterSearchTabState extends State<CharacterSearchTab> {
+class _CharacterSearchTabState extends State<CharacterSearchTab>
+    with AutomaticKeepAliveClientMixin {
   final TextEditingController _controller = TextEditingController();
-  bool _isSearching = false;
   String _selectedServer = '전체';
-  Map<String, dynamic>? _selectedCharacter;
-  List<Map<String, dynamic>> _results = [];
+  bool _isSearching = false;
+  Map<String, dynamic>? _selectedCharacter; // 상세 캐릭터
+  List<Map<String, dynamic>> _searchResults = [];
+
+  @override
+  bool get wantKeepAlive => false;
 
   final List<String> _servers = [
     '전체',
@@ -56,42 +62,80 @@ class _CharacterSearchTabState extends State<CharacterSearchTab> {
     },
   ];
 
+  final List<Map<String, dynamic>> _dummyRows = [
+    {'rank': 1, 'name': '오지환', 'level': 300, 'job': '키네시스'},
+    {'rank': 2, 'name': '버터', 'level': 300, 'job': '나이트로드'},
+    {'rank': 3, 'name': '테룡이', 'level': 300, 'job': '카이저'},
+    {'rank': 4, 'name': '솝상', 'level': 300, 'job': '비숍'},
+    {'rank': 5, 'name': '보마노랑이', 'level': 300, 'job': '보우마스터'},
+  ];
+
   void _searchCharacter() {
     final query = _controller.text.trim();
-    if (query.isEmpty) return;
+    if (query.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('캐릭터 이름을 입력하세요.')));
+      return;
+    }
+
+    final results = _mockCharacters.where((c) {
+      final matchesName = (c['name'] as String).toLowerCase().contains(
+        query.toLowerCase(),
+      );
+      final matchesServer = _selectedServer == '전체'
+          ? true
+          : c['server'] == _selectedServer;
+      return matchesName && matchesServer;
+    }).toList();
 
     setState(() {
       _isSearching = true;
+      _searchResults = results;
       _selectedCharacter = null;
-      _results = _mockCharacters.where((c) {
-        final matchesName = c['name']!.toLowerCase().contains(
-          query.toLowerCase(),
-        );
-        final matchesServer = _selectedServer == '전체'
-            ? true
-            : c['server'] == _selectedServer;
-        return matchesName && matchesServer;
-      }).toList();
+    });
+  }
+
+  void _resetSearch() {
+    setState(() {
+      _isSearching = false;
+      _selectedCharacter = null;
+      _controller.clear();
+      _selectedServer = '전체';
+      _searchResults = [];
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
+
+    // 🔹 1️⃣ 상세 보기 (같은 탭 내부에서 전환)
     if (_selectedCharacter != null) {
       return CharacterDetailView(character: _selectedCharacter!);
     }
 
-    // ✅ SafeArea만 유지, 패딩 제거
+    // 🔹 2️⃣ 검색 결과 화면
+    if (_isSearching) {
+      return CharacterSearchResult(
+        query: _controller.text,
+        results: _searchResults,
+        onCharacterSelected: (character) {
+          setState(() {
+            _selectedCharacter = character;
+          });
+        },
+      );
+    }
+
+    // 🔹 3️⃣ 기본 화면 (검색 + 랭킹)
     return SafeArea(
-      child: _isSearching
-          ? CharacterSearchResult(
-              query: _controller.text,
-              results: _results,
-              onCharacterSelected: (c) {
-                setState(() => _selectedCharacter = c);
-              },
-            )
-          : CharacterSearchInput(
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            CharacterSearchInputFull(
               selectedServer: _selectedServer,
               servers: _servers,
               controller: _controller,
@@ -99,6 +143,21 @@ class _CharacterSearchTabState extends State<CharacterSearchTab> {
                   setState(() => _selectedServer = value),
               onSearch: _searchCharacter,
             ),
+            const SizedBox(height: 24),
+            RankingTableContainer(
+              titleDate: '11월 9일',
+              serverName: '전체 서버',
+              rows: _dummyRows,
+              onMoreTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const RankingScreen()),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

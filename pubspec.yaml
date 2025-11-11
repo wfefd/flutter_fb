@@ -39,6 +39,8 @@ flutter:
     - assets/images/items/
     - assets/images/logo_done.png
     - assets/images/logo_done_big.png
+    - assets/images/fame.png
+    - assets/images/sample_weapon.png
   fonts:
     - family: Pretendard
       fonts:

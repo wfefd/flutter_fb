@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './equipment_tab.dart';
 
 class CharacterDetailView extends StatefulWidget {
   final Map<String, dynamic> character;
@@ -105,10 +106,10 @@ class _CharacterDetailViewState extends State<CharacterDetailView>
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    const Icon(
-                      Icons.workspace_premium,
-                      color: Colors.amber,
-                      size: 22,
+                    Image.asset(
+                      'assets/images/fame.png',
+                      width: 22,
+                      height: 22,
                     ),
                     const SizedBox(width: 4),
                     Text(
@@ -159,12 +160,13 @@ class _CharacterDetailViewState extends State<CharacterDetailView>
   }
 
   /// 🔹 탭 내용 (IndexedStack + Lazy Loading)
+
   Widget _buildTabContent() {
     return IndexedStack(
       index: _selectedTabIndex,
       children: List.generate(tabs.length, (i) {
+        if (i == 0) return const EquipmentTab(); // 장착장비 탭
         _tabDataCache[i] ??= _loadTabData(i);
-
         return FutureBuilder<String>(
           future: _tabDataCache[i],
           builder: (context, snapshot) {

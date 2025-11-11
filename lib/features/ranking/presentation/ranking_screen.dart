@@ -1,11 +1,12 @@
-// lib/features/ranking/presentation/ranking_screen.dart
 import 'package:flutter/material.dart';
 import '../data/job_data.dart';
 import '../widgets/ranking_list.dart';
 import '../widgets/job_selector.dart';
-import '../widgets/awakening_selector.dart';
+import '../widgets/server_selector.dart'; // 🔹 추가
 import '../../character/presentation/widgets/character_detail_view.dart';
-import '../../../core/theme/app_spacing.dart'; // 공용 spacing
+import '../../../core/theme/app_spacing.dart';
+import '../../../core/theme/app_colors.dart';
+import '../widgets/awakening_selector.dart';
 
 class RankingScreen extends StatefulWidget {
   const RankingScreen({super.key});
@@ -15,9 +16,21 @@ class RankingScreen extends StatefulWidget {
 }
 
 class _RankingScreenState extends State<RankingScreen> {
-  String _selectedRankType = '랭킹';
+  String _selectedServer = '전체';
   String? _selectedJob;
   String? _selectedAwakening;
+
+  final List<String> _servers = [
+    '전체',
+    '카인',
+    '디레지에',
+    '시로코',
+    '프레이',
+    '카시야스',
+    '힐더',
+    '안톤',
+    '바칼',
+  ];
 
   final List<Map<String, dynamic>> _dummyRankingData = [
     {
@@ -61,92 +74,79 @@ class _RankingScreenState extends State<RankingScreen> {
     },
   ];
 
-  final List<String> rankTypes = ['랭킹', '명성', '명성 전직업'];
-
   @override
   Widget build(BuildContext context) {
     final jobs = JobData.getJobs();
     final awakenings = JobData.getAwakenings(_selectedJob);
 
-    // BaseScreen이 이미 바깥에서 16px 패딩 제공 중
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _buildRankTypeSelector(),
-          const SizedBox(height: AppSpacing.md),
-          JobSelector(
-            jobs: jobs,
-            selectedJob: _selectedJob,
-            onJobSelected: _onJobSelected,
-          ),
-          const SizedBox(height: AppSpacing.lg),
-          if (_selectedJob != null)
-            AwakeningSelector(
-              job: _selectedJob!,
-              awakenings: awakenings,
-              selectedAwakening: _selectedAwakening,
-              onAwakeningSelected: _onAwakeningSelected,
-            ),
-          const SizedBox(height: AppSpacing.md),
-          if (_selectedJob != null && _selectedAwakening != null)
-            RankingList(
-              job: _selectedJob!,
-              awakening: _selectedAwakening!,
-              rankingData: _dummyRankingData,
-              onTapCharacter: (character) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => CharacterDetailView(
-                      character: character,
-                      fromRanking: true,
-                    ),
-                  ),
-                );
-              },
-            ),
-          const SizedBox(height: AppSpacing.xl), // 바닥 숨쉬기
-        ],
-      ),
-    );
-  }
+    return Container(
+      color: AppColors.background,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const SizedBox(height: AppSpacing.md),
 
-  Widget _buildRankTypeSelector() {
-    return Row(
-      children: rankTypes.map((type) {
-        final isSelected = _selectedRankType == type;
-        return Expanded(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 4),
-            child: GestureDetector(
-              onTap: () {
-                if (_selectedRankType != type) {
-                  setState(() => _selectedRankType = type);
-                }
+            // 🔹 서버 선택 섹션
+            ServerSelector(
+              servers: _servers,
+              selectedServer: _selectedServer,
+              onServerSelected: (server) {
+                setState(() => _selectedServer = server);
               },
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                height: 36,
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? const Color(0xFF7BC57B)
-                      : Colors.grey.shade200,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  type,
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.black87,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                  ),
-                ),
-              ),
             ),
-          ),
-        );
-      }).toList(),
+
+            const SizedBox(height: AppSpacing.lg),
+
+            // 🔹 직업 선택
+            JobSelector(
+              jobs: jobs,
+              selectedJob: _selectedJob,
+              onJobSelected: _onJobSelected,
+            ),
+
+            const SizedBox(height: AppSpacing.lg),
+
+            // 🔹 각성 선택
+            if (_selectedJob != null)
+              AwakeningSelector(
+                job: _selectedJob!,
+                awakenings: awakenings,
+                selectedAwakening: _selectedAwakening,
+                onAwakeningSelected: _onAwakeningSelected,
+              ),
+
+            const SizedBox(height: AppSpacing.md),
+
+            // 🔹 랭킹 리스트
+            if (_selectedJob != null && _selectedAwakening != null)
+              RankingList(
+                job: _selectedJob!,
+                awakening: _selectedAwakening!,
+                rankingData: _dummyRankingData
+                    .where(
+                      (r) =>
+                          _selectedServer == '전체' ||
+                          r['server'] == _selectedServer,
+                    )
+                    .toList(),
+                onTapCharacter: (character) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CharacterDetailView(
+                        character: character,
+                        fromRanking: true,
+                      ),
+                    ),
+                  );
+                },
+              ),
+
+            const SizedBox(height: AppSpacing.xl),
+          ],
+        ),
+      ),
     );
   }
 
