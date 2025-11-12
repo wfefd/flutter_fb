@@ -3,10 +3,10 @@ import 'package:flutter_fb/core/theme/app_colors.dart';
 import 'package:flutter_fb/core/theme/app_text_styles.dart';
 
 class RankingTableContainer extends StatelessWidget {
-  final String titleDate; // 예: '11월 9일'
-  final String serverName; // 예: '전체 서버'
+  final String titleDate;
+  final String serverName;
   final List<Map<String, dynamic>> rows;
-  final VoidCallback? onMoreTap;
+  final VoidCallback? onMoreTap; // ✅ 콜백 추가
 
   const RankingTableContainer({
     super.key,
@@ -120,10 +120,11 @@ class RankingTableContainer extends StatelessWidget {
                     child: Row(
                       children: [
                         SizedBox(
-                          width: 24,
-                          height: 26,
+                          width: 20,
+                          height: 24,
                           child: _RankBadge(rank: rank),
                         ),
+                        const SizedBox(width: 4),
                         Expanded(
                           flex: 4,
                           child: Text(
@@ -174,17 +175,7 @@ class _RankBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color color;
-    switch (rank) {
-      case 1:
-      case 2:
-      case 3:
-        color = AppColors.secondaryText;
-        break;
-      default:
-        color = Colors.white;
-    }
-
+    Color color = rank <= 3 ? AppColors.secondaryText : Colors.white;
     return Container(
       alignment: Alignment.center,
       decoration: BoxDecoration(
@@ -204,7 +195,6 @@ class _RankBadge extends StatelessWidget {
   }
 }
 
-// ✅ 헤더용 텍스트 스타일 상수
 const _headerStyle = TextStyle(
   fontSize: 13,
   fontWeight: FontWeight.w500,

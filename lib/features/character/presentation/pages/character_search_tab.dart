@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../../ranking/presentation/pages/ranking_screen.dart';
-import '../../../home/widgets/ranking_table_container.dart';
+import '../widgets/ranking_table_container.dart';
 import '../widgets/character_search_input_full.dart';
 import 'character_search_result.dart';
 import 'character_detail_view.dart';
 
 class CharacterSearchTab extends StatefulWidget {
-  const CharacterSearchTab({super.key});
+  final void Function(int)? onTabChange; // ✅ 탭 이동 콜백
+
+  const CharacterSearchTab({super.key, this.onTabChange});
 
   @override
   State<CharacterSearchTab> createState() => _CharacterSearchTabState();
@@ -17,7 +19,7 @@ class _CharacterSearchTabState extends State<CharacterSearchTab>
   final TextEditingController _controller = TextEditingController();
   String _selectedServer = '전체';
   bool _isSearching = false;
-  Map<String, dynamic>? _selectedCharacter; // 상세 캐릭터
+  Map<String, dynamic>? _selectedCharacter;
   List<Map<String, dynamic>> _searchResults = [];
 
   @override
@@ -110,28 +112,22 @@ class _CharacterSearchTabState extends State<CharacterSearchTab>
   Widget build(BuildContext context) {
     super.build(context);
 
-    // 🔹 1️⃣ 상세 보기 (같은 탭 내부에서 전환)
     if (_selectedCharacter != null) {
       return CharacterDetailView(character: _selectedCharacter!);
     }
 
-    // 🔹 2️⃣ 검색 결과 화면
     if (_isSearching) {
       return CharacterSearchResult(
         query: _controller.text,
         results: _searchResults,
         onCharacterSelected: (character) {
-          setState(() {
-            _selectedCharacter = character;
-          });
+          setState(() => _selectedCharacter = character);
         },
       );
     }
 
-    // 🔹 3️⃣ 기본 화면 (검색 + 랭킹)
     return SafeArea(
       child: SingleChildScrollView(
-        padding: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -149,10 +145,8 @@ class _CharacterSearchTabState extends State<CharacterSearchTab>
               serverName: '전체 서버',
               rows: _dummyRows,
               onMoreTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const RankingScreen()),
-                );
+                // ✅ 두 번째 탭(순위 탭)으로 이동
+                widget.onTabChange?.call(1);
               },
             ),
           ],

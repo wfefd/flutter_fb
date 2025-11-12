@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 class CharacterCard extends StatelessWidget {
   final Map<String, dynamic> character;
@@ -45,10 +46,9 @@ class CharacterCard extends StatelessWidget {
               ),
               child: Text(
                 c['class'] ?? '',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.secondaryText,
+                style: AppTextStyles.body2.copyWith(
                   fontWeight: FontWeight.w500,
+                  color: AppColors.secondaryText,
                 ),
               ),
             ),
@@ -56,13 +56,7 @@ class CharacterCard extends StatelessWidget {
             const SizedBox(height: 4),
 
             // ✅ 서버명
-            Text(
-              c['server'] ?? '',
-              style: const TextStyle(
-                fontSize: 12,
-                color: AppColors.secondaryText,
-              ),
-            ),
+            Text(c['server'] ?? '', style: AppTextStyles.body2),
 
             const SizedBox(height: AppSpacing.sm),
 
@@ -77,14 +71,7 @@ class CharacterCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
 
             // ✅ 닉네임
-            Text(
-              c['name'] ?? '',
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppColors.primaryText,
-              ),
-            ),
+            Text(c['name'] ?? '', style: AppTextStyles.subtitle),
 
             const SizedBox(height: 2),
 
@@ -96,9 +83,9 @@ class CharacterCard extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   c['power'] ?? '0',
-                  style: const TextStyle(
-                    color: AppColors.primaryText,
+                  style: AppTextStyles.body2.copyWith(
                     fontSize: 13,
+                    color: AppColors.primaryText,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

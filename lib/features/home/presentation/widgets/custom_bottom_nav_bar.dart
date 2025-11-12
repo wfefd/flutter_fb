@@ -1,8 +1,8 @@
 // lib/features/home/widgets/custom_bottom_nav_bar.dart
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
-import '../../../core/theme/app_spacing.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/app_spacing.dart';
 
 class CustomBottomNavBar extends StatelessWidget {
   final int currentIndex;

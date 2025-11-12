@@ -42,7 +42,7 @@ class CustomContainerDivided extends StatelessWidget {
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: AppColors.border,
-          width: 1,
+          width: 0.5,
           strokeAlign: BorderSide.strokeAlignInside,
         ),
       ),

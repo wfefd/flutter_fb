@@ -19,24 +19,25 @@ class JobSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // ✅ "전체"를 포함한 새 리스트
+    final allJobs = ['전체', ...jobs];
+
     return CustomContainerDivided(
       header: const Text(
         '직업 선택',
-        style: TextStyle(
-          // fontWeight: FontWeight.bold,
-          color: AppColors.primaryText,
-        ),
+        style: TextStyle(color: AppColors.primaryText),
       ),
       children: [
+        // ✅ 높이만 줄여서 2.5행 정도 보이게 수정
         ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: MediaQuery.of(context).size.height * 0.5, // 최대 높이만 제한
+          constraints: const BoxConstraints(
+            maxHeight: 120, // 약 2.5줄 정도만 보이게 고정
           ),
           child: SingleChildScrollView(
             child: Wrap(
               spacing: AppSpacing.sm,
               runSpacing: AppSpacing.sm,
-              children: jobs.map((job) {
+              children: allJobs.map((job) {
                 final isSelected = selectedJob == job;
 
                 return GestureDetector(
@@ -50,12 +51,13 @@ class JobSelector extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: isSelected
                           ? AppColors.primaryText.withOpacity(0.9)
+                          // 박스 색상
                           : AppColors.surface,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
                         color: isSelected
                             ? Colors.transparent
-                            : AppColors.border,
+                            : AppColors.surface,
                       ),
                       boxShadow: isSelected
                           ? [
@@ -70,21 +72,29 @@ class JobSelector extends StatelessWidget {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(6),
-                          child: Image.asset(
-                            'assets/images/jobs/${JobImageMap.getJobIcon(job)}',
-                            width: 26,
-                            height: 26,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(
-                                  Icons.person,
-                                  size: 24,
-                                  color: AppColors.secondaryText,
-                                ),
+                        // ✅ “전체”일 경우 아이콘 다르게 표시
+                        if (job == '전체')
+                          const Icon(
+                            Icons.all_inclusive_rounded,
+                            size: 26,
+                            color: AppColors.secondaryText,
+                          )
+                        else
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(6),
+                            child: Image.asset(
+                              'assets/images/jobs/${JobImageMap.getJobIcon(job)}',
+                              width: 26,
+                              height: 26,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(
+                                    Icons.person,
+                                    size: 24,
+                                    color: AppColors.secondaryText,
+                                  ),
+                            ),
                           ),
-                        ),
                         const SizedBox(width: 6),
                         Text(
                           job,

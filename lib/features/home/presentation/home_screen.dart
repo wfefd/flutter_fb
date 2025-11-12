@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_fb/features/home/widgets/custom_bottom_nav_bar.dart';
-import 'package:flutter_fb/features/home/widgets/custom_top_app_bar.dart';
-import 'package:flutter_fb/features/home/widgets/custom_tab_bar.dart';
+import 'package:flutter_fb/features/home/presentation/widgets/custom_bottom_nav_bar.dart';
+import 'package:flutter_fb/features/home/presentation/widgets/custom_top_app_bar.dart';
+import 'package:flutter_fb/features/home/presentation/widgets/custom_tab_bar.dart';
 import '../../character/presentation/pages/character_search_tab.dart';
 import '../../auction/presentation/auction_screen.dart';
 import '../../board/presentation/board_list_screen.dart';
@@ -15,11 +15,8 @@ class BaseScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // CharacterSearchTab일 때는 패딩 없애기
-    final bool isCharacterTab = child is CharacterSearchTab;
-
     return Padding(
-      padding: isCharacterTab ? EdgeInsets.zero : const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(16.0), // ✅ 모든 탭에 동일 패딩 적용
       child: child,
     );
   }
@@ -33,7 +30,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _bottomIndex = 1; // 0: 알림, 1: 홈, 2: 설정
+  int _bottomIndex = 1;
 
   @override
   Widget build(BuildContext context) {
@@ -49,10 +46,17 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: TabBarView(
                 children: [
-                  // 홈 탭
-                  const BaseScreen(
-                    child:
-                        CharacterSearchTab(), // ✅ 스크롤은 CharacterSearchTab 안에서 처리됨
+                  // ✅ Builder는 그대로 유지 (탭 이동용 context)
+                  Builder(
+                    builder: (innerContext) => BaseScreen(
+                      child: CharacterSearchTab(
+                        onTabChange: (index) {
+                          DefaultTabController.of(
+                            innerContext,
+                          )?.animateTo(index);
+                        },
+                      ),
+                    ),
                   ),
                   const BaseScreen(child: RankingScreen()),
                   const BaseScreen(child: AuctionScreen()),

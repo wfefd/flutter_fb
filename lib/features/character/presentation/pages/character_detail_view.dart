@@ -49,7 +49,7 @@ class _CharacterDetailViewState extends State<CharacterDetailView>
       backgroundColor: AppColors.background,
       appBar: widget.fromRanking
           ? AppBar(
-              title: Text(c['name'] ?? '캐릭터 정보', style: AppTextStyles.h2),
+              title: Text(c['name'] ?? '캐릭터 정보', style: AppTextStyles.subtitle),
               backgroundColor: AppColors.surface,
               foregroundColor: AppColors.primaryText,
               leading: IconButton(
@@ -82,39 +82,37 @@ class _CharacterDetailViewState extends State<CharacterDetailView>
             borderRadius: BorderRadius.circular(8),
             child: Image.asset(
               c['image'] ?? 'assets/images/no_image.png',
-              width: 120,
-              height: 120,
+              width: 216,
+              height: 216,
               fit: BoxFit.cover,
               cacheWidth: 240,
             ),
           ),
-          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(c['name'] ?? 'Unknown', style: AppTextStyles.h1),
+                Text(c['name'] ?? 'Unknown', style: AppTextStyles.h2),
                 const SizedBox(height: 4),
                 Text(
                   '${c['class'] ?? ''} | ${c['server'] ?? ''}',
                   style: AppTextStyles.body2,
                 ),
-                const SizedBox(height: 6),
-                Text('Lv.${c['level'] ?? 0}', style: AppTextStyles.body1),
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
+                Text('Lv.${c['level'] ?? 0}', style: AppTextStyles.body2),
+                const SizedBox(height: 4),
                 Row(
                   children: [
                     Image.asset(
                       'assets/images/fame.png',
-                      width: 24,
-                      height: 24,
+                      width: 20,
+                      height: 20,
                     ),
                     const SizedBox(width: 4),
                     Text(
                       c['power'] ?? '0',
                       style: AppTextStyles.subtitle.copyWith(
                         color: AppColors.secondaryText,
-                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],

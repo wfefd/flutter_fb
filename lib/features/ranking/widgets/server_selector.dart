@@ -47,11 +47,7 @@ class _ServerSelectorState extends State<ServerSelector> {
                             ) // 선택 시 진한 텍스트색 기반 강조
                           : AppColors.surface, // 기본 배경색
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: isSelected
-                            ? Colors.transparent
-                            : AppColors.border,
-                      ),
+
                       boxShadow: isSelected
                           ? [
                               BoxShadow(
