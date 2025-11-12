@@ -1,10 +1,10 @@
-// lib/features/auction/presentation/auction_screen.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
-
+import '../../../core/widgets/custom_text_field.dart';
 import '../models/auction_item.dart';
 import '../models/item_price.dart';
-import '../repository/auction_repository.dart'; // InMemoryAuctionRepository 포함
+import '../repository/auction_repository.dart';
+import '../presentation/widgets/auction_item_list_tab.dart'; // ✅ 새 장비형 리스트 탭 import
 
 class AuctionScreen extends StatefulWidget {
   const AuctionScreen({super.key});
@@ -15,11 +15,8 @@ class AuctionScreen extends StatefulWidget {
 
 class _AuctionScreenState extends State<AuctionScreen> {
   final TextEditingController _searchController = TextEditingController();
-
-  // ✅ 레포지토리(메모리 더미)
   late final InMemoryAuctionRepository _repo;
 
-  // ✅ 화면 상태
   List<AuctionItem> _items = [];
   List<AuctionItem> _favorites = [];
   List<ItemPrice> _allPrices = [];
@@ -27,8 +24,6 @@ class _AuctionScreenState extends State<AuctionScreen> {
 
   String _searchQuery = '';
   bool _loading = true;
-
-  // 디바운서
   Timer? _debounce;
   static const _debounceMs = 250;
 
@@ -62,14 +57,12 @@ class _AuctionScreenState extends State<AuctionScreen> {
     });
   }
 
-  // ─────────────────────────────────────────────
-  // 🔎 디바운스 핸들러
+  // 🔎 디바운스 검색
   void _onSearchTextChanged() {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: _debounceMs), _runSearch);
   }
 
-  // 🔎 검색 실행 (아이템: 레포지토리 호출, 시세: 로컬 필터)
   Future<void> _runSearch() async {
     final q = _searchController.text.trim();
     _searchQuery = q;
@@ -82,7 +75,7 @@ class _AuctionScreenState extends State<AuctionScreen> {
     if (!mounted) return;
     setState(() {
       _prices = filteredPrices;
-      _loading = true; // 아이템 검색 동안만 로딩 표시
+      _loading = true;
     });
 
     final items = await _repo.fetchItems(query: q);
@@ -106,42 +99,29 @@ class _AuctionScreenState extends State<AuctionScreen> {
 
   bool _isFav(int itemId) => _favorites.any((e) => e.id == itemId);
 
-  // ---------------- helpers ----------------
-
-  /// 썸네일: 이미지 경로가 있으면 보여주고, 없으면 기본 아이콘
-  Widget _thumb(AuctionItem item) {
-    final path = item.imagePath;
-    if (path == null || path.isEmpty) {
-      return const Icon(Icons.shopping_bag);
-    }
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(6),
-      child: Image.asset(
-        path,
-        width: 44,
-        height: 44,
-        fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported),
-      ),
-    );
-  }
-
-  // ---------------- UI Builders ----------------
-
   Widget _buildItemCard(AuctionItem item) {
     final isFav = _isFav(item.id);
     return Card(
       margin: const EdgeInsets.only(bottom: 8),
       color: isFav ? Colors.pink.shade50 : null,
       child: ListTile(
-        leading: _thumb(item), // ✅ 이미지 썸네일
+        leading: ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Image.asset(
+            item.imagePath ?? 'assets/images/no_image.png',
+            width: 44,
+            height: 44,
+            fit: BoxFit.cover,
+            errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported),
+          ),
+        ),
         title: Text(item.name),
         subtitle: Text('판매자: ${item.seller}'),
         onTap: () {
           Navigator.pushNamed(
             context,
             '/auction_item_detail',
-            arguments: item.toJson(), // 라우터가 Map 기대
+            arguments: item.toJson(),
           );
         },
         trailing: Wrap(
@@ -191,9 +171,9 @@ class _AuctionScreenState extends State<AuctionScreen> {
         final trend = p.trend;
 
         final matched = _items.cast<AuctionItem?>().firstWhere(
-              (e) => e?.name == p.name,
-              orElse: () => null,
-            );
+          (e) => e?.name == p.name,
+          orElse: () => null,
+        );
 
         return Card(
           margin: const EdgeInsets.only(bottom: 8),
@@ -225,8 +205,6 @@ class _AuctionScreenState extends State<AuctionScreen> {
     );
   }
 
-  // ---------------- Build ----------------
-
   @override
   Widget build(BuildContext context) {
     if (_loading && _items.isEmpty) {
@@ -234,92 +212,82 @@ class _AuctionScreenState extends State<AuctionScreen> {
     }
 
     return DefaultTabController(
-      length: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // 🔍 검색창
-            TextField(
+      length: 3, // 🧭 탭 3개
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8),
+            child: CustomTextField(
+              hintText: '아이템 이름을 검색하세요',
               controller: _searchController,
-              decoration: InputDecoration(
-                hintText: '아이템 이름을 검색하세요',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: _searchQuery.isEmpty
-                    ? null
-                    : IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          _runSearch();
-                        },
-                      ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                isDense: true,
-              ),
-              textInputAction: TextInputAction.search,
-              onSubmitted: (_) => _runSearch(),
             ),
-            const SizedBox(height: 10),
+          ),
+          const SizedBox(height: 4),
 
-            // 🧭 탭바
-            const TabBar(
-              labelColor: Colors.deepPurple,
-              indicatorColor: Colors.deepPurple,
-              tabs: [
-                Tab(text: '경매장 아이템 목록'),
-                Tab(text: '아이템 시세 목록'),
-              ],
-            ),
-            const SizedBox(height: 10),
+          const TabBar(
+            labelColor: Colors.deepPurple,
+            indicatorColor: Colors.deepPurple,
+            tabs: [
+              Tab(text: '경매장 아이템'),
+              Tab(text: '아이템 시세'),
+              Tab(text: '카드형 보기'),
+            ],
+          ),
+          const SizedBox(height: 4),
 
-            // 📦 탭별 콘텐츠
-            Expanded(
-              child: TabBarView(
-                children: [
-                  // 🛒 경매장 탭
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      if (_favorites.isNotEmpty) ...[
-                        const Text(
+          Expanded(
+            child: TabBarView(
+              children: [
+                // 🛒 경매장 리스트
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (_favorites.isNotEmpty) ...[
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8.0),
+                        child: Text(
                           '찜 아이템 목록',
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 10),
-                        _buildFavoriteList(),
-                        const SizedBox(height: 10),
-                      ],
-                      const Text(
+                      ),
+                      _buildFavoriteList(),
+                    ],
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 8.0),
+                      child: Text(
                         '경매장 아이템 목록',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      const SizedBox(height: 10),
-                      if (_loading)
-                        const Expanded(
-                          child: Center(child: CircularProgressIndicator()),
-                        )
-                      else
-                        _buildAuctionList(),
-                    ],
-                  ),
+                    ),
+                    if (_loading)
+                      const Expanded(
+                        child: Center(child: CircularProgressIndicator()),
+                      )
+                    else
+                      _buildAuctionList(),
+                  ],
+                ),
 
-                  // 💰 시세 탭
-                  _buildPriceList(),
-                ],
-              ),
+                // 💰 시세 탭
+                _buildPriceList(),
+
+                // 🧩 카드형 장비탭 스타일 보기
+                AuctionItemListTab(
+                  items: _items,
+                  favoriteIds: _favorites.map((e) => e.id).toSet(),
+                  onFavToggle: _toggleFavorite,
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
