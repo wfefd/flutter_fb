@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter_fb/core/theme/app_colors.dart';
 import '../../../core/widgets/custom_text_field.dart';
 import '../models/auction_item.dart';
 import '../models/item_price.dart';
 import '../repository/auction_repository.dart';
-import '../presentation/widgets/auction_item_list_tab.dart'; // ✅ 새 장비형 리스트 탭 import
+import '../presentation/auction_item_list_tab.dart';
 
 class AuctionScreen extends StatefulWidget {
   const AuctionScreen({super.key});
@@ -57,7 +58,7 @@ class _AuctionScreenState extends State<AuctionScreen> {
     });
   }
 
-  // 🔎 디바운스 검색
+  // 🔍 디바운스 검색
   void _onSearchTextChanged() {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: _debounceMs), _runSearch);
@@ -95,72 +96,6 @@ class _AuctionScreenState extends State<AuctionScreen> {
     setState(() {
       _favorites = favs;
     });
-  }
-
-  bool _isFav(int itemId) => _favorites.any((e) => e.id == itemId);
-
-  Widget _buildItemCard(AuctionItem item) {
-    final isFav = _isFav(item.id);
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      color: isFav ? Colors.pink.shade50 : null,
-      child: ListTile(
-        leading: ClipRRect(
-          borderRadius: BorderRadius.circular(6),
-          child: Image.asset(
-            item.imagePath ?? 'assets/images/no_image.png',
-            width: 44,
-            height: 44,
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported),
-          ),
-        ),
-        title: Text(item.name),
-        subtitle: Text('판매자: ${item.seller}'),
-        onTap: () {
-          Navigator.pushNamed(
-            context,
-            '/auction_item_detail',
-            arguments: item.toJson(),
-          );
-        },
-        trailing: Wrap(
-          crossAxisAlignment: WrapCrossAlignment.center,
-          spacing: 8,
-          children: [
-            Text('${item.price} G'),
-            IconButton(
-              icon: Icon(
-                isFav ? Icons.favorite : Icons.favorite_border,
-                color: isFav ? Colors.pink : Colors.grey,
-              ),
-              onPressed: () => _toggleFavorite(item.id),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFavoriteList() {
-    if (_favorites.isEmpty) return const SizedBox.shrink();
-    return Expanded(
-      flex: 1,
-      child: ListView.builder(
-        itemCount: _favorites.length,
-        itemBuilder: (context, index) => _buildItemCard(_favorites[index]),
-      ),
-    );
-  }
-
-  Widget _buildAuctionList() {
-    return Expanded(
-      flex: 2,
-      child: ListView.builder(
-        itemCount: _items.length,
-        itemBuilder: (context, index) => _buildItemCard(_items[index]),
-      ),
-    );
   }
 
   Widget _buildPriceList() {
@@ -212,7 +147,7 @@ class _AuctionScreenState extends State<AuctionScreen> {
     }
 
     return DefaultTabController(
-      length: 3, // 🧭 탭 3개
+      length: 2,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -226,12 +161,11 @@ class _AuctionScreenState extends State<AuctionScreen> {
           const SizedBox(height: 4),
 
           const TabBar(
-            labelColor: Colors.deepPurple,
-            indicatorColor: Colors.deepPurple,
+            labelColor: AppColors.secondaryText,
+            indicatorColor: AppColors.secondaryText,
             tabs: [
               Tab(text: '경매장 아이템'),
               Tab(text: '아이템 시세'),
-              Tab(text: '카드형 보기'),
             ],
           ),
           const SizedBox(height: 4),
@@ -239,51 +173,52 @@ class _AuctionScreenState extends State<AuctionScreen> {
           Expanded(
             child: TabBarView(
               children: [
-                // 🛒 경매장 리스트
+                // 🧩 경매장 아이템 탭 (찜 목록 + 전체 아이템)
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     if (_favorites.isNotEmpty) ...[
-                      const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Text(
-                          '찜 아이템 목록',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
+                      Expanded(
+                        flex: 1,
+                        child: AuctionItemListTab(
+                          headerTitle: '찜 목록', // ✅ 헤더 변경
+                          items: _favorites,
+                          favoriteIds: _favorites.map((e) => e.id).toSet(),
+                          onFavToggle: _toggleFavorite,
+                          onItemTap: (item) {
+                            Navigator.pushNamed(
+                              context,
+                              '/auction_item_detail',
+                              arguments: item.toJson(),
+                            );
+                          },
                         ),
                       ),
-                      _buildFavoriteList(),
                     ],
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 8.0),
-                      child: Text(
-                        '경매장 아이템 목록',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                    const SizedBox(height: 8),
+                    Expanded(
+                      flex: 2,
+                      child: _loading
+                          ? const Center(child: CircularProgressIndicator())
+                          : AuctionItemListTab(
+                              headerTitle: '경매장 아이템', // ✅ 기본 헤더
+                              items: _items,
+                              favoriteIds: _favorites.map((e) => e.id).toSet(),
+                              onFavToggle: _toggleFavorite,
+                              onItemTap: (item) {
+                                Navigator.pushNamed(
+                                  context,
+                                  '/auction_item_detail',
+                                  arguments: item.toJson(),
+                                );
+                              },
+                            ),
                     ),
-                    if (_loading)
-                      const Expanded(
-                        child: Center(child: CircularProgressIndicator()),
-                      )
-                    else
-                      _buildAuctionList(),
                   ],
                 ),
 
-                // 💰 시세 탭
+                // 💰 아이템 시세 탭
                 _buildPriceList(),
-
-                // 🧩 카드형 장비탭 스타일 보기
-                AuctionItemListTab(
-                  items: _items,
-                  favoriteIds: _favorites.map((e) => e.id).toSet(),
-                  onFavToggle: _toggleFavorite,
-                ),
               ],
             ),
           ),

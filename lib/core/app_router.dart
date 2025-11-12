@@ -2,22 +2,22 @@
 import 'package:flutter/material.dart';
 
 // --- 각 화면 import ---
-import '../../features/auth/presentation/login_screen.dart';
-import '../../features/home/presentation/home_screen.dart';
-import '../../features/settings/presentation/settings_screen.dart';
-import '../../features/auction/presentation/auction_itemDetail_screen.dart';
-import '../../features/auction/presentation/auction_itemPrice_screen.dart';
-import '../../features/board/presentation/board_detail_screen.dart';
-import '../../features/auth/presentation/find_id_screen.dart';
-import '../../features/auth/presentation/find_password_screen.dart';
-import '../../features/auth/presentation/register_screen.dart';
-import '../../features/auth/presentation/guest_login_screen.dart';
-import '../../features/community/presentation/community_list_screen.dart';
-import '../../features/community/presentation/community_post_write_screen.dart';
-import '../../features/board/presentation/board_write_screen.dart';
-import '../../features/community/presentation/community_detail_screen.dart';
-import '../../features/community/model/community_post.dart';
-import '../../features/community/repository/community_repository.dart';
+import '../features/auth/presentation/login_screen.dart';
+import '../features/home/presentation/home_screen.dart';
+import '../features/settings/presentation/settings_screen.dart';
+import '../features/auction/presentation/auction_itemDetail_screen.dart';
+import '../features/auction/presentation/auction_itemPrice_screen.dart';
+import '../features/board/presentation/board_detail_screen.dart';
+import '../features/auth/presentation/find_id_screen.dart';
+import '../features/auth/presentation/find_password_screen.dart';
+import '../features/auth/presentation/register_screen.dart';
+import '../features/auth/presentation/guest_login_screen.dart';
+import '../features/community/presentation/community_list_screen.dart';
+import '../features/community/presentation/community_post_write_screen.dart';
+import '../features/board/presentation/board_write_screen.dart';
+import '../features/community/presentation/community_detail_screen.dart';
+import '../features/community/model/community_post.dart';
+import '../features/community/repository/community_repository.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
