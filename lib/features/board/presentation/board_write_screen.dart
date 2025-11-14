@@ -1,9 +1,14 @@
+// lib/features/board/presentation/notice_write_screen.dart
 import 'package:flutter/material.dart';
 
-// ✅ 공지 모델/카테고리/레포 import (경로 구조에 맞춰둠)
+// 공지 관련
 import '../model/notice.dart';
 import '../model/notice_category.dart';
 import '../repository/notice_repository.dart';
+
+// 앱 공통 디자인
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class NoticeWriteScreen extends StatefulWidget {
   const NoticeWriteScreen({super.key});
@@ -18,8 +23,8 @@ class _NoticeWriteScreenState extends State<NoticeWriteScreen> {
   final _formKey = GlobalKey<FormState>();
 
   bool _submitting = false;
-  bool _showPreview = false;
 
+  // 기본은 일반 공지, 버튼 눌렀을 때만 이벤트/점검으로 변경
   NoticeCategory _category = NoticeCategory.general;
 
   static const int _titleMax = 80;
@@ -33,13 +38,15 @@ class _NoticeWriteScreenState extends State<NoticeWriteScreen> {
   }
 
   Future<void> _submit() async {
-    // ✅ 같은 레포 인스턴스를 arguments로 받음
-    final repo = ModalRoute.of(context)!.settings.arguments
-        as NoticeRepository?; // InMemoryNoticeRepository 등
+    // 레포는 route arguments로 전달받는 구조 유지
+    final repo =
+        ModalRoute.of(context)!.settings.arguments as NoticeRepository?;
 
     if (repo == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('레포지토리를 전달받지 못했습니다. FAB에서 arguments로 레포를 넘겨주세요.')),
+        const SnackBar(
+          content: Text('레포지토리를 전달받지 못했습니다. arguments로 레포를 넘겨주세요.'),
+        ),
       );
       return;
     }
@@ -50,7 +57,7 @@ class _NoticeWriteScreenState extends State<NoticeWriteScreen> {
 
     final now = DateTime.now();
     final draft = Notice(
-      id: 0, // 레포에서 id 할당
+      id: 0,
       title: _titleCtrl.text.trim(),
       content: _contentCtrl.text.trim(),
       author: '운영팀',
@@ -64,218 +71,314 @@ class _NoticeWriteScreenState extends State<NoticeWriteScreen> {
     try {
       final created = await repo.createNotice(draft);
       if (!mounted) return;
-      Navigator.pop(context, created); // 성공 시 생성된 Notice 돌려주기
+      Navigator.pop(context, created);
     } catch (e) {
       if (!mounted) return;
       setState(() => _submitting = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('작성 실패: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('작성 실패: $e')));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final isWide = MediaQuery.of(context).size.width >= 900;
-
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('공지사항 작성'),
-        actions: [
-          IconButton(
-            tooltip: _showPreview ? '편집 보기' : '미리보기',
-            icon: Icon(_showPreview ? Icons.edit_note : Icons.preview),
-            onPressed: () => setState(() => _showPreview = !_showPreview),
-          ),
-        ],
-      ),
-      body: Form(
-        key: _formKey,
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: isWide
-              ? Row(
+      appBar: AppBar(title: const Text('공지사항 작성')),
+      body: SafeArea(
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 720),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Expanded(child: _buildEditor(context)),
-                    const SizedBox(width: 16),
-                    Expanded(child: _buildPreviewCard(context)),
-                  ],
-                )
-              : ListView(
-                  children: [
-                    _buildEditor(context),
-                    const SizedBox(height: 16),
-                    if (_showPreview) _buildPreviewCard(context),
-                    const SizedBox(height: 80),
+                    // 섹션 타이틀
+                    Text(
+                      '공지 정보',
+                      style: AppTextStyles.body1.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.primaryText,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+
+                    // 이벤트 / 점검 카테고리 선택 (list_screen 버튼 스타일 재사용)
+                    Row(
+                      children: [
+                        _buildCategoryPill(
+                          NoticeCategory.event,
+                          '이벤트',
+                          Icons.celebration,
+                        ),
+                        const SizedBox(width: 8),
+                        _buildCategoryPill(
+                          NoticeCategory.maintenance,
+                          '점검',
+                          Icons.build_rounded,
+                        ),
+                        const Spacer(),
+                        if (_category == NoticeCategory.general)
+                          Text(
+                            '일반 공지',
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.secondaryText,
+                            ),
+                          )
+                        else
+                          TextButton(
+                            onPressed: () {
+                              setState(() {
+                                _category = NoticeCategory.general;
+                              });
+                            },
+                            child: Text(
+                              '일반 공지로 전환',
+                              style: AppTextStyles.caption.copyWith(
+                                color: AppColors.secondaryText,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // 제목 필드
+                    Text(
+                      '제목',
+                      style: AppTextStyles.body2.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryText,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _titleCtrl,
+                      maxLength: _titleMax,
+                      style: AppTextStyles.body1.copyWith(
+                        color: AppColors.primaryText,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: '공지 제목을 입력하세요 (최대 80자)',
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: AppColors.border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: AppColors.primaryText,
+                            width: 1.4,
+                          ),
+                        ),
+                        counterStyle: AppTextStyles.caption.copyWith(
+                          color: AppColors.secondaryText,
+                        ),
+                      ),
+                      validator: (v) {
+                        final s = v?.trim() ?? '';
+                        if (s.isEmpty) return '제목을 입력하세요.';
+                        return null;
+                      },
+                      textInputAction: TextInputAction.next,
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    // 내용 필드
+                    Text(
+                      '내용',
+                      style: AppTextStyles.body2.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primaryText,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _contentCtrl,
+                      style: AppTextStyles.body2.copyWith(
+                        color: AppColors.primaryText,
+                        height: 1.5,
+                      ),
+                      decoration: InputDecoration(
+                        hintText: '공지 내용을 작성하세요. (엔터로 줄바꿈)',
+                        alignLabelWithHint: true,
+                        filled: true,
+                        fillColor: Colors.white,
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                          vertical: 12,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(color: AppColors.border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: BorderSide(
+                            color: AppColors.primaryText,
+                            width: 1.4,
+                          ),
+                        ),
+                      ),
+                      keyboardType: TextInputType.multiline,
+                      maxLines: 12,
+                      minLines: 8,
+                      validator: (v) {
+                        final s = v?.trim() ?? '';
+                        if (s.length < _contentMin) {
+                          return '내용은 최소 $_contentMin자 이상 입력하세요.';
+                        }
+                        return null;
+                      },
+                    ),
+
+                    const SizedBox(height: 8),
+
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.info_outline,
+                          size: 16,
+                          color: AppColors.secondaryText,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          '등록 후 공지 목록에서 확인할 수 있어요.',
+                          style: AppTextStyles.caption.copyWith(
+                            color: AppColors.secondaryText,
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 24),
+
+                    // 작성 완료 버튼
+                    SizedBox(
+                      height: 48,
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: _submitting ? null : _submit,
+                        style: ButtonStyle(
+                          backgroundColor:
+                              MaterialStateProperty.resolveWith<Color>((
+                                states,
+                              ) {
+                                if (states.contains(MaterialState.disabled)) {
+                                  return AppColors.border;
+                                }
+                                if (states.contains(MaterialState.pressed)) {
+                                  return AppColors.primaryText.withOpacity(0.9);
+                                }
+                                if (states.contains(MaterialState.hovered)) {
+                                  return AppColors.secondaryText;
+                                }
+                                return AppColors.primaryText;
+                              }),
+                          foregroundColor: MaterialStateProperty.all<Color>(
+                            Colors.white,
+                          ),
+                          shape: MaterialStateProperty.all(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          textStyle: MaterialStateProperty.all(
+                            AppTextStyles.body1.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          elevation: MaterialStateProperty.all(0),
+                        ),
+                        child: _submitting
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('작성 완료'),
+                      ),
+                    ),
                   ],
                 ),
+              ),
+            ),
+          ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _submitting ? null : _submit,
-        icon: _submitting
-            ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2))
-            : const Icon(Icons.check),
-        label: const Text('작성 완료'),
       ),
     );
   }
 
   // ===== UI blocks =====
 
-  Widget _buildEditor(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        // 카테고리 + 제목
-        Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 1.5,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const _SectionTitle(icon: Icons.campaign, title: '공지 정보'),
-                const SizedBox(height: 12),
+  Widget _buildCategoryPill(
+    NoticeCategory target,
+    String label,
+    IconData icon,
+  ) {
+    final isSelected = _category == target;
 
-                // 🔘 공지 유형 선택 (3개 버튼 느낌)
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: [
-                    ChoiceChip(
-                      label: const Text('일반'),
-                      selected: _category == NoticeCategory.general,
-                      onSelected: (_) => setState(() => _category = NoticeCategory.general),
-                    ),
-                    ChoiceChip(
-                      label: const Text('이벤트'),
-                      selected: _category == NoticeCategory.event,
-                      onSelected: (_) => setState(() => _category = NoticeCategory.event),
-                    ),
-                    ChoiceChip(
-                      label: const Text('점검'),
-                      selected: _category == NoticeCategory.maintenance,
-                      onSelected: (_) => setState(() => _category = NoticeCategory.maintenance),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-
-                TextFormField(
-                  controller: _titleCtrl,
-                  maxLength: _titleMax,
-                  decoration: const InputDecoration(
-                    labelText: '제목',
-                    hintText: '공지 제목을 입력하세요 (최대 80자)',
-                    prefixIcon: Icon(Icons.title),
-                    border: OutlineInputBorder(),
-                    isDense: true,
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          // 같은 걸 한 번 더 누르면 일반 공지로 돌아가게
+          if (_category == target) {
+            _category = NoticeCategory.general;
+          } else {
+            _category = target;
+          }
+        });
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primaryText.withOpacity(0.9)
+              : AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primaryText.withOpacity(0.18),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
                   ),
-                  validator: (v) {
-                    final s = v?.trim() ?? '';
-                    if (s.isEmpty) return '제목을 입력하세요.';
-                    return null;
-                  },
-                  textInputAction: TextInputAction.next,
-                ),
-              ],
-            ),
-          ),
+                ]
+              : [],
         ),
-
-        const SizedBox(height: 12),
-
-        // 내용
-        Card(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          elevation: 1.5,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const _SectionTitle(icon: Icons.notes, title: '내용'),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _contentCtrl,
-                  decoration: const InputDecoration(
-                    hintText: '공지 내용을 작성하세요. (엔터로 줄바꿈)',
-                    alignLabelWithHint: true,
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.multiline,
-                  maxLines: 12,
-                  minLines: 8,
-                  validator: (v) {
-                    final s = v?.trim() ?? '';
-                    if (s.length < _contentMin) return '내용은 최소 $_contentMin자 이상 입력하세요.';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  children: [
-                    Icon(Icons.info_outline, size: 16, color: Theme.of(context).hintColor),
-                    const SizedBox(width: 6),
-                    Text(
-                      '등록 후 목록에서 확인할 수 있어요.',
-                      style: TextStyle(fontSize: 12, color: Theme.of(context).hintColor),
-                    ),
-                    const Spacer(),
-                    TextButton.icon(
-                      icon: Icon(_showPreview ? Icons.visibility_off : Icons.visibility),
-                      label: Text(_showPreview ? '미리보기 끄기' : '미리보기'),
-                      onPressed: () => setState(() => _showPreview = !_showPreview),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPreviewCard(BuildContext context) {
-    final title = _titleCtrl.text.trim().isEmpty ? '제목 미입력' : _titleCtrl.text.trim();
-    final content = _contentCtrl.text.trim().isEmpty ? '내용 미입력' : _contentCtrl.text.trim();
-
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      elevation: 1.5,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const _SectionTitle(icon: Icons.preview, title: '미리보기'),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                Chip(avatar: const Icon(Icons.sell, size: 16), label: Text(_catLabel(_category))),
-                const Chip(avatar: Icon(Icons.person, size: 16), label: Text('운영팀')),
-                Chip(avatar: const Icon(Icons.today, size: 16), label: Text(_fmtDate(DateTime.now()))),
-              ],
-            ),
-            const SizedBox(height: 12),
             Text(
-              title,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                color: Theme.of(context).colorScheme.surfaceVariant.withOpacity(0.4),
+              label,
+              style: AppTextStyles.body2.copyWith(
+                color: isSelected ? Colors.white : AppColors.primaryText,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
               ),
-              child: Text(content, style: const TextStyle(height: 1.5)),
             ),
           ],
         ),
@@ -286,7 +389,9 @@ class _NoticeWriteScreenState extends State<NoticeWriteScreen> {
   // ===== utils =====
 
   String _fmtDate(DateTime d) =>
-      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
+      '${d.year.toString().padLeft(4, '0')}-'
+      '${d.month.toString().padLeft(2, '0')}-'
+      '${d.day.toString().padLeft(2, '0')}';
 
   String _catLabel(NoticeCategory c) {
     switch (c) {
@@ -313,7 +418,9 @@ class _SectionTitle extends StatelessWidget {
         const SizedBox(width: 6),
         Text(
           title,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
         ),
       ],
     );

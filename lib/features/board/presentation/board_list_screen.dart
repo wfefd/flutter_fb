@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../model/notice.dart';
 import '../model/notice_category.dart';
 import '../repository/notice_repository.dart';
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
 
 class BoardListScreen extends StatefulWidget {
   const BoardListScreen({super.key});
@@ -11,37 +13,27 @@ class BoardListScreen extends StatefulWidget {
   State<BoardListScreen> createState() => _BoardListScreenState();
 }
 
-class _BoardListScreenState extends State<BoardListScreen>
-    with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
+class _BoardListScreenState extends State<BoardListScreen> {
   late final InMemoryNoticeRepository _repo;
 
+  int _selectedFilter = 0; // 0: 전체, 1: 이벤트, 2: 점검
   List<Notice> _notices = [];
   bool _loading = true;
+
+  Notice? _selectedNotice; // 디테일에서 보여줄 선택된 공지
 
   @override
   void initState() {
     super.initState();
     _repo = InMemoryNoticeRepository();
-    _tabController = TabController(length: 3, vsync: this)
-      ..addListener(() {
-        if (_tabController.indexIsChanging) return;
-        _loadForTab(_tabController.index);
-      });
-    _loadForTab(0); // 초기: 전체
+    _loadForFilter(_selectedFilter);
   }
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _loadForTab(int tabIndex) async {
+  Future<void> _loadForFilter(int index) async {
     setState(() => _loading = true);
 
     NoticeCategory? category;
-    switch (tabIndex) {
+    switch (index) {
       case 1:
         category = NoticeCategory.event;
         break;
@@ -59,102 +51,306 @@ class _BoardListScreenState extends State<BoardListScreen>
     setState(() {
       _notices = data;
       _loading = false;
+      _selectedNotice = null; // 필터 바꾸면 상세에서 다시 리스트로
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      // 상단 탭 + 목록은 body에 유지
-      body: Column(
-        children: [
-          // 🔹 공지 카테고리 탭바
-          Container(
-            color: Colors.grey.shade200,
-            child: TabBar(
-              controller: _tabController,
-              labelColor: Colors.black,
-              indicatorColor: Colors.blue,
-              tabs: const [
-                Tab(text: '전체'),
-                Tab(text: '이벤트'),
-                Tab(text: '점검'),
-              ],
-            ),
-          ),
+    return Stack(
+      children: [
+        Column(
+          children: [
+            Expanded(
+              child: Container(
+                margin: const EdgeInsets.fromLTRB(16, 16, 16, 0), // 양옆 + 위 여백
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: AppColors.border,
+                    width: 1,
+                    strokeAlign: BorderSide.strokeAlignInside,
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 리스트 모드일 때만 상단 제목 / 필터 / 헤더 노출
+                    if (_selectedNotice == null) ...[
+                      // 상단 제목
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(
+                          '공지사항',
+                          style: AppTextStyles.body1.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
 
-          // 🔹 탭별 공지사항 목록
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              physics: const NeverScrollableScrollPhysics(), // 탭 버튼으로만 전환
-              children: [
-                _buildNoticeList(context, _notices),
-                _buildNoticeList(context, _notices),
-                _buildNoticeList(context, _notices),
-              ],
-            ),
-          ),
-        ],
-      ),
+                      // 필터 버튼 영역
+                      Container(
+                        width: double.infinity,
+                        color: const Color(0xFFF9FAFB),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            children: [
+                              _buildFilterPill(0, '전체'),
+                              const SizedBox(width: 8),
+                              _buildFilterPill(1, '이벤트'),
+                              const SizedBox(width: 8),
+                              _buildFilterPill(2, '점검'),
+                            ],
+                          ),
+                        ),
+                      ),
 
-      // 🔸 플로팅 액션 버튼: 공지 작성
-      floatingActionButton: FloatingActionButton(
-        tooltip: '공지 작성',
-        child: const Icon(Icons.add),
+                      // 테이블 헤더
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 6,
+                        ),
+                        color: const Color(0xFFF7F7F7),
+                        child: Row(
+                          children: const [
+                            SizedBox(
+                              width: 72,
+                              child: Text('카테고리', style: _headerStyle),
+                            ),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Center(
+                                child: Text('제목', style: _headerStyle),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+
+                    // 리스트 / 디테일 토글 영역
+                    Expanded(
+                      child: _selectedNotice == null
+                          ? _buildNoticeList(context)
+                          : _buildDetailScreen(context, _selectedNotice!),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+
+        // 🔹 오른쪽 하단 "공지 작성" 버튼 (컨테이너 밖, 디자인 맞춤)
+        Positioned(right: 24, bottom: 24, child: _buildWriteButton(context)),
+      ],
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // 공지 작성 버튼
+
+  Widget _buildWriteButton(BuildContext context) {
+    return SizedBox(
+      height: 44,
+      child: ElevatedButton.icon(
         onPressed: () async {
-          // 같은 레포 인스턴스를 전달 → write 화면에서 저장
           final result = await Navigator.pushNamed(
             context,
             '/notice_write',
-            arguments: _repo, // NoticeRepository 구현체
+            arguments: _repo, // NoticeWriteScreen에서 repo 받도록 설계되어 있음
           );
 
-          // 작성 후 돌아오면 현재 탭 기준으로 다시 로드
-          if (result != null && mounted) {
-            _loadForTab(_tabController.index);
+          // 작성 후 돌아왔을 때 목록 갱신 (성공 시 Notice 돌려주는 구조 기준)
+          if (result is Notice) {
+            _loadForFilter(_selectedFilter);
           }
         },
+        icon: const Icon(Icons.edit, size: 18),
+        label: const Text('공지 작성'),
+        style: ButtonStyle(
+          padding: MaterialStateProperty.all(
+            const EdgeInsets.symmetric(horizontal: 16),
+          ),
+          backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+            if (states.contains(MaterialState.disabled)) {
+              return AppColors.border; // Disabled
+            }
+            if (states.contains(MaterialState.pressed)) {
+              return AppColors.primaryText.withOpacity(0.9); // Pressed
+            }
+            if (states.contains(MaterialState.hovered)) {
+              return AppColors.secondaryText; // Hover
+            }
+            return AppColors.primaryText; // Default
+          }),
+          foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+          shape: MaterialStateProperty.all(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+          ),
+          textStyle: MaterialStateProperty.all(
+            AppTextStyles.body2.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          elevation: MaterialStateProperty.all(0),
+        ),
       ),
     );
   }
 
-  Widget _buildNoticeList(BuildContext context, List<Notice> notices) {
+  // ---------------------------------------------------------------------------
+  // 필터 버튼
+
+  Widget _buildFilterPill(int index, String label) {
+    final isSelected = _selectedFilter == index;
+
+    return GestureDetector(
+      onTap: () {
+        if (_selectedFilter == index) return;
+        setState(() {
+          _selectedFilter = index;
+        });
+        _loadForFilter(index);
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150), // 글쓰기 pill과 맞춤
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppColors.primaryText.withOpacity(0.9)
+              : AppColors.surface,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primaryText.withOpacity(0.18),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : [],
+        ),
+        child: Text(
+          label,
+          style: AppTextStyles.body2.copyWith(
+            color: isSelected ? Colors.white : AppColors.primaryText,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // 리스트 본문
+
+  Widget _buildNoticeList(BuildContext context) {
     if (_loading) {
       return const Center(child: CircularProgressIndicator());
     }
-    if (notices.isEmpty) {
-      return const Center(child: Text('공지사항이 없습니다.'));
+
+    if (_notices.isEmpty) {
+      return Center(
+        child: Text(
+          '공지사항이 없습니다.',
+          style: AppTextStyles.body2.copyWith(color: AppColors.secondaryText),
+        ),
+      );
     }
 
     return ListView.separated(
-      padding: const EdgeInsets.all(16),
-      itemCount: notices.length,
-      separatorBuilder: (_, __) => const Divider(),
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      itemCount: _notices.length,
       itemBuilder: (context, index) {
-        final n = notices[index];
-        return ListTile(
-          leading: n.pinned ? const Icon(Icons.push_pin, size: 18) : null,
-          title: Text(
-            n.title,
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          subtitle: Text(_fmtDate(n.createdAt)),
-          trailing: const Icon(Icons.arrow_forward_ios, size: 16),
-          onTap: () {
-            // 기존 '/board_detail' 라우트가 Map<String,String> 기대 → 변환해서 전달
-            Navigator.pushNamed(
-              context,
-              '/board_detail',
-              arguments: {
-                'title': n.title,
-                'date': _fmtDate(n.createdAt),
-                'content': n.content,
-              },
-            );
-          },
-        );
+        final n = _notices[index];
+        return _buildNoticeRow(context, n);
       },
+      separatorBuilder: (_, __) =>
+          Divider(height: 1, color: Colors.grey.shade200),
+    );
+  }
+
+  Widget _buildNoticeRow(BuildContext context, Notice n) {
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _selectedNotice = n;
+        });
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+          horizontal: _rowHorizontalPadding,
+          vertical: 6,
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(width: 72, child: _buildCategoryBadge(n)),
+            const SizedBox(width: _badgeContentGap),
+            Expanded(
+              child: Text(
+                n.title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.body1.copyWith(
+                  color: AppColors.primaryText,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCategoryBadge(Notice n) {
+    final NoticeCategory? c = n.category;
+
+    String label = '공지';
+    Color bg = const Color(0xFFE9F5EE);
+    Color textColor = const Color(0xFF208C4E);
+
+    switch (c) {
+      case NoticeCategory.event:
+        label = '이벤트';
+        bg = const Color(0xFFFFE2D2);
+        textColor = const Color(0xFF5A3C2A);
+        break;
+      case NoticeCategory.maintenance:
+        label = '점검';
+        bg = const Color(0xFFE3ECF5);
+        textColor = const Color(0xFF344055);
+        break;
+      case null:
+      default:
+        label = '공지';
+        bg = const Color(0xFFD6EFE8);
+        textColor = const Color(0xFF208C4E);
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Text(
+        label,
+        textAlign: TextAlign.center,
+        style: AppTextStyles.caption.copyWith(
+          color: textColor,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 
@@ -163,4 +359,125 @@ class _BoardListScreenState extends State<BoardListScreen>
         '${d.month.toString().padLeft(2, '0')}-'
         '${d.day.toString().padLeft(2, '0')}';
   }
+
+  // ---------------------------------------------------------------------------
+  // 🔹 상세 화면
+
+  Widget _buildDetailScreen(BuildContext context, Notice n) {
+    final title = n.title;
+    final date = _fmtDate(n.createdAt);
+    final content = n.content;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // 상단: 제목 + 기존 배지 + 날짜
+        Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // 현재 글의 제목
+              Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: AppTextStyles.body1.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primaryText,
+                ),
+              ),
+              const SizedBox(height: 6),
+
+              Row(
+                children: [
+                  // 리스트와 동일한 배지 사용
+                  _buildCategoryBadge(n),
+                  const SizedBox(width: 8),
+                  Text(
+                    date,
+                    style: AppTextStyles.body2.copyWith(
+                      color: AppColors.secondaryText,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+
+        const Divider(height: 1, color: Color(0xFFEAEAEA)),
+
+        // 본문 스크롤 영역
+        Expanded(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+            child: Text(
+              content.isEmpty ? '내용이 없습니다.' : content,
+              style: AppTextStyles.body2.copyWith(
+                color: AppColors.primaryText,
+                height: 1.5,
+              ),
+            ),
+          ),
+        ),
+
+        const Divider(height: 1, color: Color(0xFFEAEAEA)),
+
+        // 하단: 목록으로 이동 버튼
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+          child: SizedBox(
+            height: 48,
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                setState(() {
+                  _selectedNotice = null;
+                });
+              },
+              style: ButtonStyle(
+                backgroundColor: MaterialStateProperty.resolveWith<Color>((
+                  states,
+                ) {
+                  if (states.contains(MaterialState.disabled)) {
+                    return AppColors.border; // Disabled
+                  }
+                  if (states.contains(MaterialState.pressed)) {
+                    return AppColors.primaryText.withOpacity(0.9); // Pressed
+                  }
+                  if (states.contains(MaterialState.hovered)) {
+                    return AppColors.secondaryText; // Hover
+                  }
+                  return AppColors.primaryText; // Default
+                }),
+                foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                shape: MaterialStateProperty.all(
+                  RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                textStyle: MaterialStateProperty.all(
+                  AppTextStyles.body1.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                elevation: MaterialStateProperty.all(0),
+              ),
+              child: const Text('목록으로'),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 }
+
+const _headerStyle = TextStyle(
+  fontSize: 12,
+  fontWeight: FontWeight.w500,
+  color: AppColors.primaryText,
+);
+const double _rowHorizontalPadding = 10;
+const double _badgeContentGap = 24;

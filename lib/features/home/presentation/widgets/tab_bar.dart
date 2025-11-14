@@ -12,20 +12,19 @@ class CustomTabBar extends StatelessWidget implements PreferredSizeWidget {
       child: Container(
         color: AppColors.surface,
         child: Align(
-          alignment: Alignment.center,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8), // ✅ 좌우 8px 동일하게
             child: TabBar(
-              // isScrollable: false, // ✅ 모든 탭이 같은 너비 차지
-              indicatorColor: AppColors.secondaryText,
+              isScrollable: false, // ✅ 모든 탭이 같은 너비 차지
+              indicatorColor: AppColors.primaryText,
               indicatorWeight: 1,
-              labelColor: AppColors.secondaryText,
+              labelColor: AppColors.primaryText,
               unselectedLabelColor: AppColors.secondaryText,
               labelStyle: AppTextStyles.body1.copyWith(
                 fontWeight: FontWeight.w600,
               ),
-              unselectedLabelStyle: AppTextStyles.body2,
-              labelPadding: const EdgeInsets.symmetric(horizontal: 16),
+              unselectedLabelStyle: AppTextStyles.body1,
+              labelPadding: const EdgeInsets.symmetric(horizontal: 12),
               tabs: const [
                 Tab(text: '홈'),
                 Tab(text: '순위'),

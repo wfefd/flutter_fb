@@ -1,9 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_fb/core/theme/app_colors.dart';
-import '../../../core/widgets/custom_text_field.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/custom_text_field.dart';
 import '../models/auction_item.dart';
-import '../models/item_price.dart';
 import '../repository/auction_repository.dart';
 import '../presentation/auction_item_list_tab.dart';
 
@@ -14,16 +13,14 @@ class AuctionScreen extends StatefulWidget {
   State<AuctionScreen> createState() => _AuctionScreenState();
 }
 
-class _AuctionScreenState extends State<AuctionScreen> {
+class _AuctionScreenState extends State<AuctionScreen>
+    with SingleTickerProviderStateMixin {
   final TextEditingController _searchController = TextEditingController();
   late final InMemoryAuctionRepository _repo;
+  late TabController _innerTabController;
 
   List<AuctionItem> _items = [];
   List<AuctionItem> _favorites = [];
-  List<ItemPrice> _allPrices = [];
-  List<ItemPrice> _prices = [];
-
-  String _searchQuery = '';
   bool _loading = true;
   Timer? _debounce;
   static const _debounceMs = 250;
@@ -32,6 +29,7 @@ class _AuctionScreenState extends State<AuctionScreen> {
   void initState() {
     super.initState();
     _repo = InMemoryAuctionRepository();
+    _innerTabController = TabController(length: 2, vsync: this);
     _loadInitial();
     _searchController.addListener(_onSearchTextChanged);
   }
@@ -40,25 +38,22 @@ class _AuctionScreenState extends State<AuctionScreen> {
   void dispose() {
     _debounce?.cancel();
     _searchController.dispose();
+    _innerTabController.dispose();
     super.dispose();
   }
 
   Future<void> _loadInitial() async {
     setState(() => _loading = true);
     final items = await _repo.fetchItems();
-    final prices = await _repo.fetchPrices();
     final favs = await _repo.fetchFavorites();
     if (!mounted) return;
     setState(() {
       _items = items;
-      _allPrices = prices;
-      _prices = prices;
       _favorites = favs;
       _loading = false;
     });
   }
 
-  // 🔍 디바운스 검색
   void _onSearchTextChanged() {
     _debounce?.cancel();
     _debounce = Timer(const Duration(milliseconds: _debounceMs), _runSearch);
@@ -66,21 +61,11 @@ class _AuctionScreenState extends State<AuctionScreen> {
 
   Future<void> _runSearch() async {
     final q = _searchController.text.trim();
-    _searchQuery = q;
-
-    final filteredPrices = _allPrices.where((p) {
-      if (q.isEmpty) return true;
-      return p.name.toLowerCase().contains(q.toLowerCase());
-    }).toList();
-
-    if (!mounted) return;
-    setState(() {
-      _prices = filteredPrices;
-      _loading = true;
-    });
+    setState(() => _loading = true);
 
     final items = await _repo.fetchItems(query: q);
     final favs = await _repo.fetchFavorites();
+
     if (!mounted) return;
     setState(() {
       _items = items;
@@ -98,132 +83,91 @@ class _AuctionScreenState extends State<AuctionScreen> {
     });
   }
 
-  Widget _buildPriceList() {
-    return ListView.builder(
-      itemCount: _prices.length,
-      itemBuilder: (context, index) {
-        final p = _prices[index];
-        final trend = p.trend;
-
-        final matched = _items.cast<AuctionItem?>().firstWhere(
-          (e) => e?.name == p.name,
-          orElse: () => null,
-        );
-
-        return Card(
-          margin: const EdgeInsets.only(bottom: 8),
-          child: ListTile(
-            leading: const Icon(Icons.trending_up),
-            title: Text(p.name),
-            subtitle: Text('평균 시세: ${p.avgPrice} G'),
-            trailing: Text(
-              trend,
-              style: TextStyle(
-                color: trend.startsWith('+') ? Colors.green : Colors.red,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            onTap: () {
-              final arg = matched != null
-                  ? matched.toJson()
-                  : {
-                      'name': p.name,
-                      'price': p.avgPrice,
-                      'seller': '정보 없음',
-                      'id': -1,
-                    };
-              Navigator.pushNamed(context, '/item_price', arguments: arg);
-            },
-          ),
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
-    if (_loading && _items.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // ✅ 내부 탭바
+        Container(
+          width: double.infinity,
+          color: AppColors.surface, // 위 스샷의 연한 회색 영역
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+          child: TabBar(
+            controller: _innerTabController,
+            isScrollable: true,
 
-    return DefaultTabController(
-      length: 2,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8),
-            child: CustomTextField(
-              hintText: '아이템 이름을 검색하세요',
-              controller: _searchController,
+            // 🚫 밑줄 / 배경 모두 제거
+            indicatorColor: Colors.transparent,
+            indicator: const BoxDecoration(),
+            splashFactory: NoSplash.splashFactory,
+            overlayColor: MaterialStatePropertyAll(Colors.transparent),
+
+            // 글자 스타일
+            labelColor: AppColors.primaryText, // 선택된 탭 (경매장아이템)
+            unselectedLabelColor: AppColors.secondaryText.withOpacity(0.6),
+
+            labelStyle: const TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 13,
             ),
-          ),
-          const SizedBox(height: 4),
+            unselectedLabelStyle: const TextStyle(
+              fontWeight: FontWeight.w400,
+              fontSize: 13,
+            ),
+            labelPadding: const EdgeInsets.only(right: 24),
 
-          const TabBar(
-            labelColor: AppColors.secondaryText,
-            indicatorColor: AppColors.secondaryText,
-            tabs: [
-              Tab(text: '경매장 아이템'),
-              Tab(text: '아이템 시세'),
+            tabs: const [
+              Tab(text: '경매장아이템'),
+              Tab(text: '찜목록'),
             ],
           ),
-          const SizedBox(height: 4),
+        ),
 
-          Expanded(
-            child: TabBarView(
-              children: [
-                // 🧩 경매장 아이템 탭 (찜 목록 + 전체 아이템)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (_favorites.isNotEmpty) ...[
-                      Expanded(
-                        flex: 1,
-                        child: AuctionItemListTab(
-                          headerTitle: '찜 목록', // ✅ 헤더 변경
-                          items: _favorites,
-                          favoriteIds: _favorites.map((e) => e.id).toSet(),
-                          onFavToggle: _toggleFavorite,
-                          onItemTap: (item) {
-                            Navigator.pushNamed(
-                              context,
-                              '/auction_item_detail',
-                              arguments: item.toJson(),
-                            );
-                          },
-                        ),
-                      ),
-                    ],
-                    const SizedBox(height: 8),
-                    Expanded(
-                      flex: 2,
-                      child: _loading
-                          ? const Center(child: CircularProgressIndicator())
-                          : AuctionItemListTab(
-                              headerTitle: '경매장 아이템', // ✅ 기본 헤더
-                              items: _items,
-                              favoriteIds: _favorites.map((e) => e.id).toSet(),
-                              onFavToggle: _toggleFavorite,
-                              onItemTap: (item) {
-                                Navigator.pushNamed(
-                                  context,
-                                  '/auction_item_detail',
-                                  arguments: item.toJson(),
-                                );
-                              },
-                            ),
-                    ),
-                  ],
-                ),
-
-                // 💰 아이템 시세 탭
-                _buildPriceList(),
-              ],
-            ),
+        // 🔍 검색창
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 4),
+          child: CustomTextField(
+            hintText: '아이템 이름을 검색하세요',
+            controller: _searchController,
           ),
-        ],
-      ),
+        ),
+
+        // 이하 그대로
+        Expanded(
+          child: TabBarView(
+            controller: _innerTabController,
+            children: [
+              _loading
+                  ? const Center(child: CircularProgressIndicator())
+                  : AuctionItemListTab(
+                      items: _items,
+                      favoriteIds: _favorites.map((e) => e.id).toSet(),
+                      onFavToggle: _toggleFavorite,
+                      onItemTap: (item) {
+                        Navigator.pushNamed(
+                          context,
+                          '/auction_item_detail',
+                          arguments: item.toJson(),
+                        );
+                      },
+                    ),
+              AuctionItemListTab(
+                items: _favorites,
+                favoriteIds: _favorites.map((e) => e.id).toSet(),
+                onFavToggle: _toggleFavorite,
+                onItemTap: (item) {
+                  Navigator.pushNamed(
+                    context,
+                    '/auction_item_detail',
+                    arguments: item.toJson(),
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

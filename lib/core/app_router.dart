@@ -56,12 +56,12 @@ class AppRouter {
         return MaterialPageRoute(builder: (_) => ItemPriceScreen(item: item));
 
       // ✅ 공지사항 상세 페이지 (공지사항 상세)
-      case '/board_detail':
-        final notice = settings.arguments as Map<String, String>;
-        return MaterialPageRoute(
-          builder: (_) => BoardDetailScreen(),
-          settings: RouteSettings(arguments: notice),
-        );
+      // case '/board_detail':
+      //   final notice = settings.arguments as Map<String, String>;
+      // return MaterialPageRoute(
+      //   // builder: (_) => BoardDetailScreen(),
+      //   settings: RouteSettings(arguments: notice),
+      // );
 
       // ✅ 공지사항 작성 페이지
       case '/notice_write':

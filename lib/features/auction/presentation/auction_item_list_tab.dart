@@ -8,7 +8,7 @@ class AuctionItemListTab extends StatelessWidget {
   final Set<int> favoriteIds;
   final void Function(int itemId) onFavToggle;
   final void Function(AuctionItem item)? onItemTap;
-  final String headerTitle; // ✅ 추가: 헤더 텍스트 변경용
+  final String headerTitle;
 
   const AuctionItemListTab({
     super.key,
@@ -16,7 +16,7 @@ class AuctionItemListTab extends StatelessWidget {
     required this.favoriteIds,
     required this.onFavToggle,
     this.onItemTap,
-    this.headerTitle = '경매장 아이템', // 기본값
+    this.headerTitle = '경매장 아이템',
   });
 
   @override
@@ -33,7 +33,7 @@ class AuctionItemListTab extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ✅ 헤더 고정
+        // ✅ 헤더
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           child: Text(
@@ -48,10 +48,9 @@ class AuctionItemListTab extends StatelessWidget {
 
         const Divider(height: 1, color: AppColors.border),
 
-        // ✅ 리스트 스크롤
+        // ✅ 리스트
         Expanded(
           child: ListView.builder(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
             itemCount: items.length,
             itemBuilder: (context, index) {
               final item = items[index];
@@ -74,6 +73,7 @@ class AuctionItemListTab extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
+                        // 🖼️ 이미지
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: Image.asset(
@@ -84,6 +84,8 @@ class AuctionItemListTab extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(width: 12),
+
+                        // 📄 아이템 이름 + 가격
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -99,36 +101,32 @@ class AuctionItemListTab extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 4),
-                              Text(
-                                '판매자: ${item.seller}',
-                                style: const TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.secondaryText,
-                                ),
+                              Row(
+                                children: [
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${item.price} G',
+                                    style: const TextStyle(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.amber,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
                         ),
+
                         const SizedBox(width: 8),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              '${item.price} G',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 13,
-                                color: Colors.deepPurple,
-                              ),
-                            ),
-                            IconButton(
-                              icon: Icon(
-                                isFav ? Icons.favorite : Icons.favorite_border,
-                                color: isFav ? Colors.pink : Colors.grey,
-                              ),
-                              onPressed: () => onFavToggle(item.id),
-                            ),
-                          ],
+
+                        // ❤️ 찜버튼
+                        IconButton(
+                          icon: Icon(
+                            isFav ? Icons.favorite : Icons.favorite_border,
+                            color: isFav ? Colors.pink : Colors.grey,
+                          ),
+                          onPressed: () => onFavToggle(item.id),
                         ),
                       ],
                     ),

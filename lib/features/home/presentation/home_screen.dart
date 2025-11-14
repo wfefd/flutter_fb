@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_fb/features/home/presentation/widgets/custom_bottom_nav_bar.dart';
-import 'package:flutter_fb/features/home/presentation/widgets/custom_top_app_bar.dart';
-import 'package:flutter_fb/features/home/presentation/widgets/custom_tab_bar.dart';
+import 'package:flutter_fb/features/home/presentation/widgets/bottom_nav_bar.dart';
+import 'package:flutter_fb/features/home/presentation/widgets/top_app_bar.dart';
+import 'package:flutter_fb/features/home/presentation/widgets/tab_bar.dart';
 import '../../character/presentation/pages/character_search_tab.dart';
 import '../../auction/presentation/auction_screen.dart';
 import '../../board/presentation/board_list_screen.dart';
@@ -59,9 +59,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const BaseScreen(child: RankingScreen()),
-                  const BaseScreen(child: AuctionScreen()),
-                  const BaseScreen(child: CommunityListScreen()),
-                  const BaseScreen(child: BoardListScreen()),
+                  const AuctionScreen(),
+                  const CommunityListScreen(),
+                  const BoardListScreen(),
                 ],
               ),
             ),

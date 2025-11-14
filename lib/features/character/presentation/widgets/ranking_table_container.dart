@@ -196,7 +196,7 @@ class _RankBadge extends StatelessWidget {
 }
 
 const _headerStyle = TextStyle(
-  fontSize: 13,
+  fontSize: 12,
   fontWeight: FontWeight.w500,
   color: AppColors.primaryText,
 );
