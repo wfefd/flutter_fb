@@ -73,15 +73,15 @@ class _CommunityListScreenState extends State<CommunityListScreen> {
         children: [
           Column(
             children: [
-              // 🔎 검색 필드 (CustomTextField 사용)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+              // 🔎 검색 필드 영역 배경색
+              Container(
+                color: const Color(0xFFF7F7F7), // ← 여기 배경색
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                 child: CustomTextField(
                   hintText: '제목/내용 검색',
                   controller: _searchController,
                 ),
               ),
-
               Expanded(
                 child: Container(
                   margin: const EdgeInsets.only(top: 8),

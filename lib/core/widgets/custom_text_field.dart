@@ -8,6 +8,7 @@ class CustomTextField extends StatelessWidget {
   final TextEditingController? controller;
   final bool isError;
   final String? helperText;
+  final ValueChanged<String>? onSubmitted;
 
   const CustomTextField({
     super.key,
@@ -15,12 +16,15 @@ class CustomTextField extends StatelessWidget {
     this.controller,
     this.isError = false,
     this.helperText,
+    this.onSubmitted,
   });
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      textInputAction: TextInputAction.search, // 검색 버튼으로
+      onSubmitted: onSubmitted, // ✅ 여기 연결
       decoration: InputDecoration(
         hintText: hintText,
         hintStyle: AppTextStyles.body2.copyWith(color: AppColors.secondaryText),
@@ -46,10 +50,7 @@ class CustomTextField extends StatelessWidget {
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(
-            color: Color(0xFFD9534F), // Error 빨강
-            width: 1.2,
-          ),
+          borderSide: const BorderSide(color: Color(0xFFD9534F), width: 1.2),
         ),
         helperText: helperText,
         helperStyle: AppTextStyles.caption.copyWith(

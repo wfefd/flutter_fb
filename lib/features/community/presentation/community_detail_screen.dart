@@ -165,8 +165,10 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen>
                                 strokeAlign: BorderSide.strokeAlignInside,
                               ),
                             ),
+                            // 카드 내부
                             child: Column(
                               children: [
+                                // 스크롤 영역: 제목, 본문, 댓글까지
                                 Expanded(
                                   child: ListView(
                                     padding: EdgeInsets.zero,
@@ -206,14 +208,14 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen>
                                         ),
                                       ),
 
-                                      // 2) 내용 위/아래 전체 Divider
+                                      // 내용 위/아래 디바이더
                                       const Divider(
                                         height: 1,
                                         thickness: 1,
                                         color: AppColors.border,
                                       ),
 
-                                      // 3) 본문 + 중앙 좋아요
+                                      // 2) 본문 + 중앙 좋아요
                                       Padding(
                                         padding: const EdgeInsets.fromLTRB(
                                           16,
@@ -254,14 +256,14 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen>
                                         ),
                                       ),
 
-                                      // 4) 내용 / 댓글 사이 Divider
+                                      // 내용 / 댓글 사이 디바이더
                                       const Divider(
                                         height: 1,
                                         thickness: 1,
                                         color: AppColors.border,
                                       ),
 
-                                      // 5) 댓글 섹션 + 목록으로 버튼
+                                      // 3) 댓글 섹션 (목록으로는 여기서 제거!)
                                       Padding(
                                         padding: const EdgeInsets.fromLTRB(
                                           16,
@@ -269,21 +271,78 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen>
                                           16,
                                           16,
                                         ),
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.stretch,
-                                          children: [
-                                            _buildCommentSection(context),
-                                            const SizedBox(height: 12),
-                                            PrimaryButton(
-                                              text: '목록으로',
-                                              onPressed: () =>
-                                                  Navigator.pop(context),
-                                            ),
-                                          ],
-                                        ),
+                                        child: _buildCommentSection(context),
                                       ),
                                     ],
+                                  ),
+                                ),
+
+                                // 🔻 카드 맨 아래 고정 디바이더
+                                const Divider(
+                                  height: 1,
+                                  thickness: 1,
+                                  color: AppColors.border,
+                                ),
+
+                                // 🔻 공지 detail과 같은 스타일의 '목록으로' 버튼 (카드 하단 고정)
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16,
+                                    8,
+                                    16,
+                                    12,
+                                  ),
+                                  child: SizedBox(
+                                    height: 48,
+                                    width: double.infinity,
+                                    child: ElevatedButton(
+                                      onPressed: () {
+                                        Navigator.pop(context);
+                                      },
+                                      style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.resolveWith<
+                                              Color
+                                            >((states) {
+                                              if (states.contains(
+                                                MaterialState.disabled,
+                                              )) {
+                                                return AppColors.border;
+                                              }
+                                              if (states.contains(
+                                                MaterialState.pressed,
+                                              )) {
+                                                return AppColors.primaryText
+                                                    .withOpacity(0.9);
+                                              }
+                                              if (states.contains(
+                                                MaterialState.hovered,
+                                              )) {
+                                                return AppColors.secondaryText;
+                                              }
+                                              return AppColors.primaryText;
+                                            }),
+                                        foregroundColor:
+                                            MaterialStateProperty.all<Color>(
+                                              Colors.white,
+                                            ),
+                                        shape: MaterialStateProperty.all(
+                                          RoundedRectangleBorder(
+                                            borderRadius: BorderRadius.circular(
+                                              8,
+                                            ),
+                                          ),
+                                        ),
+                                        textStyle: MaterialStateProperty.all(
+                                          AppTextStyles.body1.copyWith(
+                                            color: Colors.white,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                        elevation: MaterialStateProperty.all(0),
+                                      ),
+                                      child: const Text('목록으로'),
+                                    ),
                                   ),
                                 ),
                               ],
@@ -314,12 +373,6 @@ class _CommunityDetailScreenState extends State<CommunityDetailScreen>
         // 헤더
         Row(
           children: [
-            const Icon(
-              Icons.chat_bubble_outline,
-              size: 18,
-              color: AppColors.primaryText,
-            ),
-            const SizedBox(width: 6),
             Text(
               '댓글 ($count)',
               style: AppTextStyles.body2.copyWith(

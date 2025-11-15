@@ -5,7 +5,6 @@ import '../features/auth/presentation/login_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import '../features/auction/presentation/auction_itemDetail_screen.dart';
-import '../features/auction/presentation/auction_itemPrice_screen.dart';
 import '../features/board/presentation/board_detail_screen.dart';
 import '../features/auth/presentation/find_id_screen.dart';
 import '../features/auth/presentation/find_password_screen.dart';
@@ -17,6 +16,7 @@ import '../features/board/presentation/board_write_screen.dart';
 import '../features/community/presentation/community_detail_screen.dart';
 import '../features/community/model/community_post.dart';
 import '../features/community/repository/community_repository.dart';
+import '../features/auction/presentation/auction_favorite_screen.dart';
 
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
@@ -47,11 +47,11 @@ class AppRouter {
           builder: (_) => const AuctionItemDetailScreen(),
           settings: settings,
         );
-
-      case '/item_price':
-        final item = settings.arguments as Map<String, dynamic>;
-        return MaterialPageRoute(builder: (_) => ItemPriceScreen(item: item));
-
+      case '/auction_favorites':
+        return MaterialPageRoute(
+          builder: (_) => const AuctionFavoriteScreen(),
+          settings: settings,
+        );
       // 공지 작성
       case '/notice_write':
         return MaterialPageRoute(

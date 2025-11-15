@@ -2,16 +2,18 @@ class AuctionItem {
   final int id;
   final String name;
   final int price;
-  final String seller;
 
-  // ✅ 썸네일(자산) 경로 추가
+  // ✅ 판매자는 선택사항으로 변경 (UI에서 안 써도 됨)
+  final String? seller;
+
+  // ✅ 썸네일(자산) 경로
   final String? imagePath;
 
   const AuctionItem({
     required this.id,
     required this.name,
     required this.price,
-    required this.seller,
+    this.seller,
     this.imagePath,
   });
 
@@ -32,18 +34,18 @@ class AuctionItem {
   }
 
   factory AuctionItem.fromJson(Map<String, dynamic> j) => AuctionItem(
-        id: j['id'] as int,
-        name: j['name'] as String,
-        price: j['price'] as int,
-        seller: j['seller'] as String? ?? '—',
-        imagePath: j['imagePath'] as String?,     // ✅
-      );
+    id: j['id'] as int,
+    name: j['name'] as String,
+    price: j['price'] as int,
+    seller: j['seller'] as String?, // ✅ 기본값 강제 제거
+    imagePath: j['imagePath'] as String?,
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'price': price,
-        'seller': seller,
-        'imagePath': imagePath,                   // ✅
-      };
+    'id': id,
+    'name': name,
+    'price': price,
+    'seller': seller,
+    'imagePath': imagePath,
+  };
 }
