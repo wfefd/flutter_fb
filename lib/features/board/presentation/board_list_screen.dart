@@ -57,13 +57,18 @@ class _BoardListScreenState extends State<BoardListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDetail = _selectedNotice != null;
+
     return Stack(
       children: [
         Column(
           children: [
             Expanded(
               child: Container(
-                margin: const EdgeInsets.fromLTRB(16, 16, 16, 0), // 양옆 + 위 여백
+                // 🔹 리스트/디테일에 따라 margin 분기
+                margin: isDetail
+                    ? const EdgeInsets.fromLTRB(16, 16, 16, 0) // 디테일: 좌우 여백 O
+                    : const EdgeInsets.only(top: 16), // 리스트: 위만 여백
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(8),
@@ -77,7 +82,7 @@ class _BoardListScreenState extends State<BoardListScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     // 리스트 모드일 때만 상단 제목 / 필터 / 헤더 노출
-                    if (_selectedNotice == null) ...[
+                    if (!isDetail) ...[
                       // 상단 제목
                       Padding(
                         padding: const EdgeInsets.all(12),
@@ -137,9 +142,9 @@ class _BoardListScreenState extends State<BoardListScreen> {
 
                     // 리스트 / 디테일 토글 영역
                     Expanded(
-                      child: _selectedNotice == null
-                          ? _buildNoticeList(context)
-                          : _buildDetailScreen(context, _selectedNotice!),
+                      child: isDetail
+                          ? _buildDetailScreen(context, _selectedNotice!)
+                          : _buildNoticeList(context),
                     ),
                   ],
                 ),
@@ -148,8 +153,9 @@ class _BoardListScreenState extends State<BoardListScreen> {
           ],
         ),
 
-        // 🔹 오른쪽 하단 "공지 작성" 버튼 (컨테이너 밖, 디자인 맞춤)
-        Positioned(right: 24, bottom: 24, child: _buildWriteButton(context)),
+        // 🔹 오른쪽 하단 "공지 작성" 버튼 (디테일에서는 감춤)
+        if (!isDetail)
+          Positioned(right: 24, bottom: 24, child: _buildWriteButton(context)),
       ],
     );
   }
@@ -165,7 +171,7 @@ class _BoardListScreenState extends State<BoardListScreen> {
           final result = await Navigator.pushNamed(
             context,
             '/notice_write',
-            arguments: _repo, // NoticeWriteScreen에서 repo 받도록 설계되어 있음
+            arguments: _repo, // NoticeWriteScreen에서 repo 받도록 설계
           );
 
           // 작성 후 돌아왔을 때 목록 갱신 (성공 시 Notice 돌려주는 구조 기준)
@@ -222,7 +228,7 @@ class _BoardListScreenState extends State<BoardListScreen> {
         _loadForFilter(index);
       },
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 150), // 글쓰기 pill과 맞춤
+        duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: isSelected
@@ -361,7 +367,7 @@ class _BoardListScreenState extends State<BoardListScreen> {
   }
 
   // ---------------------------------------------------------------------------
-  // 🔹 상세 화면
+  // 상세 화면
 
   Widget _buildDetailScreen(BuildContext context, Notice n) {
     final title = n.title;
@@ -371,13 +377,12 @@ class _BoardListScreenState extends State<BoardListScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 상단: 제목 + 기존 배지 + 날짜
+        // 상단: 제목 + 배지 + 날짜
         Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // 현재 글의 제목
               Text(
                 title,
                 maxLines: 2,
@@ -388,10 +393,8 @@ class _BoardListScreenState extends State<BoardListScreen> {
                 ),
               ),
               const SizedBox(height: 6),
-
               Row(
                 children: [
-                  // 리스트와 동일한 배지 사용
                   _buildCategoryBadge(n),
                   const SizedBox(width: 8),
                   Text(

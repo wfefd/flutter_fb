@@ -1,3 +1,4 @@
+// lib/features/community/model/community_post.dart
 import 'post_category.dart';
 
 class CommunityPost {
@@ -9,6 +10,7 @@ class CommunityPost {
   final PostCategory category;
   final int views;
   final int commentCount;
+  final int likes; // 👍 좋아요 개수
 
   const CommunityPost({
     required this.id,
@@ -19,6 +21,7 @@ class CommunityPost {
     required this.category,
     this.views = 0,
     this.commentCount = 0,
+    this.likes = 0, // 기본값 0
   });
 
   CommunityPost copyWith({
@@ -30,6 +33,7 @@ class CommunityPost {
     PostCategory? category,
     int? views,
     int? commentCount,
+    int? likes,
   }) {
     return CommunityPost(
       id: id ?? this.id,
@@ -40,6 +44,7 @@ class CommunityPost {
       category: category ?? this.category,
       views: views ?? this.views,
       commentCount: commentCount ?? this.commentCount,
+      likes: likes ?? this.likes,
     );
   }
 
@@ -53,17 +58,19 @@ class CommunityPost {
       category: categoryFromString(json['category'] as String? ?? 'general'),
       views: json['views'] as int? ?? 0,
       commentCount: json['commentCount'] as int? ?? 0,
+      likes: json['likes'] as int? ?? 0, // JSON에 없으면 0
     );
   }
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'title': title,
-        'content': content,
-        'author': author,
-        'createdAt': createdAt.toIso8601String(),
-        'category': categoryToString(category),
-        'views': views,
-        'commentCount': commentCount,
-      };
+    'id': id,
+    'title': title,
+    'content': content,
+    'author': author,
+    'createdAt': createdAt.toIso8601String(),
+    'category': categoryToString(category),
+    'views': views,
+    'commentCount': commentCount,
+    'likes': likes, // 직렬화에도 포함
+  };
 }

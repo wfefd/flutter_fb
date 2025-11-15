@@ -1,6 +1,15 @@
+// lib/features/community/presentation/community_list_screen.dart
 import 'package:flutter/material.dart';
+
 import '../repository/community_repository.dart';
 import '../model/community_post.dart';
+
+// 앱 공통 디자인
+import '../../../core/theme/app_colors.dart';
+import '../../../core/theme/app_text_styles.dart';
+
+// 커스텀 검색 필드
+import '../../../core/widgets/custom_text_field.dart';
 
 class CommunityListScreen extends StatefulWidget {
   const CommunityListScreen({super.key});
@@ -33,11 +42,10 @@ class _CommunityListScreenState extends State<CommunityListScreen> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
-    // 전체 로드
     final data = await _repo.fetchPosts();
     setState(() {
       _allPosts = data;
-      _applyFilter(); // 초기 필터(빈 검색어면 전체)
+      _applyFilter(); // 초기 필터
       _loading = false;
     });
   }
@@ -52,7 +60,7 @@ class _CommunityListScreenState extends State<CommunityListScreen> {
       _filteredPosts = _allPosts.where((p) {
         final t = p.title.toLowerCase();
         final c = p.content.toLowerCase();
-        return t.contains(q) || c.contains(q); // 제목/내용 검색
+        return t.contains(q) || c.contains(q);
       }).toList();
     });
   }
@@ -61,98 +69,186 @@ class _CommunityListScreenState extends State<CommunityListScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.transparent,
-
-      body: Column(
+      body: Stack(
         children: [
-          // 🔎 제목/내용 검색 필드
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: '제목/내용 검색',
-                prefixIcon: const Icon(Icons.search),
-                suffixIcon: (_searchController.text.isEmpty)
-                    ? null
-                    : IconButton(
-                        icon: const Icon(Icons.clear),
-                        onPressed: () {
-                          _searchController.clear();
-                          _applyFilter();
-                        },
-                      ),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(10),
+          Column(
+            children: [
+              // 🔎 검색 필드 (CustomTextField 사용)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
+                child: CustomTextField(
+                  hintText: '제목/내용 검색',
+                  controller: _searchController,
                 ),
-                isDense: true,
               ),
-              textInputAction: TextInputAction.search,
-              onSubmitted: (_) => _applyFilter(),
-            ),
+
+              Expanded(
+                child: Container(
+                  margin: const EdgeInsets.only(top: 8),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: AppColors.border,
+                      width: 1,
+                      strokeAlign: BorderSide.strokeAlignInside,
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // 상단 제목 (공지사항 리스트랑 맞춤)
+                      Padding(
+                        padding: const EdgeInsets.all(12),
+                        child: Text(
+                          '커뮤니티',
+                          style: AppTextStyles.body1.copyWith(
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.primaryText,
+                          ),
+                        ),
+                      ),
+
+                      const Divider(height: 1, color: Color(0xFFEAEAEA)),
+
+                      // 리스트 영역
+                      Expanded(
+                        child: _loading
+                            ? const Center(child: CircularProgressIndicator())
+                            : _filteredPosts.isEmpty
+                            ? Center(
+                                child: Text(
+                                  '게시글이 없습니다.',
+                                  style: AppTextStyles.body2.copyWith(
+                                    color: AppColors.secondaryText,
+                                  ),
+                                ),
+                              )
+                            : ListView.separated(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 6,
+                                ),
+                                itemCount: _filteredPosts.length,
+                                separatorBuilder: (_, __) => Divider(
+                                  height: 1,
+                                  color: Colors.grey.shade200,
+                                ),
+                                itemBuilder: (context, index) {
+                                  final p = _filteredPosts[index];
+                                  return _buildPostRow(context, p);
+                                },
+                              ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
 
-          Expanded(
-            child: _loading
-                ? const Center(child: CircularProgressIndicator())
-                : _filteredPosts.isEmpty
-                    ? const Center(child: Text('게시글이 없습니다.'))
-                    : ListView.separated(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        itemCount: _filteredPosts.length,
-                        separatorBuilder: (_, __) => const Divider(height: 1),
-                        itemBuilder: (context, index) {
-                          final p = _filteredPosts[index];
-                          return ListTile(
-                            title: Text(
-                              p.title,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Text(
-                              '${p.author} · ${_fmtDate(p.createdAt)} · 조회 ${p.views} · 댓글 ${p.commentCount}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            trailing:
-                                const Icon(Icons.arrow_forward_ios, size: 16),
-                            onTap: () {
-                              Navigator.pushNamed(
-                                context,
-                                '/community_detail',
-                                arguments: p, // CommunityPost 그대로 전달
-                              );
-                            },
-                          );
-                        },
-                      ),
-          ),
+          // 🔹 오른쪽 하단 "글 작성" 버튼 (공지사항 작성 버튼과 동일 스타일)
+          Positioned(right: 24, bottom: 24, child: _buildWriteButton(context)),
         ],
       ),
+    );
+  }
 
-      // ➕ FAB (글쓰기)
+  // ---------------------------------------------------------------------------
+  // 게시글 한 줄 UI (공지 리스트 스타일에 맞춰 커스텀)
 
-      floatingActionButton: FloatingActionButton(
+  Widget _buildPostRow(BuildContext context, CommunityPost p) {
+    return InkWell(
+      onTap: () {
+        Navigator.pushNamed(
+          context,
+          '/community_detail',
+          // detail 쪽에서 repo도 필요하면 Map으로 넘겨서 쓰는 패턴 사용 가능
+          arguments: p,
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // 제목
+            Text(
+              p.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.body1.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppColors.primaryText,
+              ),
+            ),
+            const SizedBox(height: 4),
+
+            // 글쓴이 · 시간 · 조회 · 댓글 · 좋아요
+            Text(
+              '${p.author} · ${_fmtDate(p.createdAt)} · 조회 ${p.views} · 댓글 ${p.commentCount} · 좋아요 ${p.likes}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.caption.copyWith(
+                color: AppColors.secondaryText,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // 글 작성 버튼 (공지사항 작성 버튼 스타일 재사용)
+
+  Widget _buildWriteButton(BuildContext context) {
+    return SizedBox(
+      height: 44,
+      child: ElevatedButton.icon(
         onPressed: () async {
           final created = await Navigator.pushNamed(
             context,
             '/community_post_write',
-            arguments: _repo, // ✅ 같은 레포 인스턴스를 넘겨서 저장 일관성 유지
+            arguments: _repo,
           );
-          if (created != null) {
-            // 방법1) 새 글을 맨 위에 붙이고 필터 재적용
+
+          if (created != null && created is CommunityPost) {
             setState(() {
-              _allPosts.insert(0, created as CommunityPost);
+              _allPosts.insert(0, created);
             });
             _applyFilter();
-
-            // 방법2) 전체를 레포에서 다시 로드하고 싶으면:
-            // await _load();
           }
         },
-        child: const Icon(Icons.add),
+        icon: const Icon(Icons.edit, size: 18),
+        label: const Text('글 작성'),
+        style: ButtonStyle(
+          padding: MaterialStateProperty.all(
+            const EdgeInsets.symmetric(horizontal: 16),
+          ),
+          backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+            if (states.contains(MaterialState.disabled)) {
+              return AppColors.border; // Disabled
+            }
+            if (states.contains(MaterialState.pressed)) {
+              return AppColors.primaryText.withOpacity(0.9); // Pressed
+            }
+            if (states.contains(MaterialState.hovered)) {
+              return AppColors.secondaryText; // Hover
+            }
+            return AppColors.primaryText; // Default
+          }),
+          foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+          shape: MaterialStateProperty.all(
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+          ),
+          textStyle: MaterialStateProperty.all(
+            AppTextStyles.body2.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          elevation: MaterialStateProperty.all(0),
+        ),
       ),
     );
   }
