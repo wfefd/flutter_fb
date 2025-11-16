@@ -32,9 +32,7 @@ class PrimaryButton extends StatelessWidget {
           }),
           foregroundColor: WidgetStateProperty.all(Colors.white),
           shape: WidgetStateProperty.all(
-            RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppSpacing.sm),
-            ),
+            RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           ),
           textStyle: WidgetStateProperty.all(
             AppTextStyles.body1.copyWith(

@@ -46,6 +46,8 @@ flutter:
 
     # 🔹 스탯 아이콘 폴더 전체
     - assets/images/stat/
+    # 구글로고
+    - assets/images/google_logo.png
 
   fonts:
     - family: Pretendard
@@ -54,6 +56,8 @@ flutter:
         - asset: assets/fonts/Pretendard-Medium.ttf
         - asset: assets/fonts/Pretendard-SemiBold.ttf
         - asset: assets/fonts/Pretendard-Bold.ttf
+        
+        
 
 flutter_native_splash:
   color: "#FFFFFF"

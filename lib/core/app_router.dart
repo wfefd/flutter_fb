@@ -5,7 +5,6 @@ import '../features/auth/presentation/login_screen.dart';
 import '../features/home/presentation/home_screen.dart';
 import '../features/settings/presentation/settings_screen.dart';
 import '../features/auction/presentation/auction_itemDetail_screen.dart';
-import '../features/board/presentation/board_detail_screen.dart';
 import '../features/auth/presentation/find_id_screen.dart';
 import '../features/auth/presentation/find_password_screen.dart';
 import '../features/auth/presentation/register_screen.dart';
