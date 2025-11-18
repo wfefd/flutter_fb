@@ -1,11 +1,21 @@
 // lib/main.dart
 import 'package:flutter/material.dart';
-import 'core/app_router.dart';
-import 'core/theme/app_theme.dart'; // ✅ 추가
+import 'package:firebase_core/firebase_core.dart';      // ✅ 추가
+import 'firebase_options.dart';                        // ✅ 추가 (flutterfire configure가 만들어 준 파일)
 
-void main() {
-  debugProfileBuildsEnabled = true;
-  debugPrintRebuildDirtyWidgets = true;
+import 'core/app_router.dart';
+import 'core/theme/app_theme.dart';
+
+Future<void> main() async {                            // ✅ async 로 변경
+  WidgetsFlutterBinding.ensureInitialized();           // ✅ Flutter 바인딩 초기화
+
+  await Firebase.initializeApp(                        // ✅ Firebase 초기화
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // debugProfileBuildsEnabled = true;
+  // debugPrintRebuildDirtyWidgets = true;
+
   runApp(const MyApp());
 }
 
@@ -17,7 +27,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Game Search',
-      theme: appTheme, // ✅ 커스텀 테마 적용
+      theme: appTheme,
       initialRoute: '/',
       onGenerateRoute: AppRouter.generateRoute,
     );

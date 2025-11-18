@@ -30,6 +30,8 @@ class _CommunityListScreenState extends State<CommunityListScreen> {
   void initState() {
     super.initState();
     _repo = InMemoryCommunityRepository();
+    _repo.loadFromFirestore();
+
     _load();
     _searchController.addListener(_applyFilter);
   }
@@ -42,7 +44,13 @@ class _CommunityListScreenState extends State<CommunityListScreen> {
 
   Future<void> _load() async {
     setState(() => _loading = true);
+
+    // 🔹 1) Firestore → InMemory로 먼저 로딩
+    await _repo.loadFromFirestore();
+
+    // 🔹 2) 메모리에서 게시글 가져오기
     final data = await _repo.fetchPosts();
+
     setState(() {
       _allPosts = data;
       _applyFilter(); // 초기 필터
