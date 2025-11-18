@@ -1,13 +1,32 @@
 {
   "project_info": {
-    "project_number": "137298359155",
-    "project_id": "opensource-20200548",
-    "storage_bucket": "opensource-20200548.firebasestorage.app"
+    "project_number": "800134555306",
+    "project_id": "opensource-teamproject",
+    "storage_bucket": "opensource-teamproject.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:137298359155:android:39c16a2c7163901d444b06",
+        "mobilesdk_app_id": "1:800134555306:android:d197320eae877cb11312d3",
+        "android_client_info": {
+          "package_name": "com.example.firebasedb"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBCbHgLyqhluTcv8hqSfihYAUIJQG0jUs8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:800134555306:android:cff86eccaaa7bf941312d3",
         "android_client_info": {
           "package_name": "com.example.flutter_fb"
         }
@@ -15,7 +34,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBB7YVttAQk6NgM5m2LhYkMRxvkxSKbo48"
+          "current_key": "AIzaSyBCbHgLyqhluTcv8hqSfihYAUIJQG0jUs8"
         }
       ],
       "services": {

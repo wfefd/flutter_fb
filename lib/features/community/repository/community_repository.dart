@@ -1,7 +1,9 @@
+import 'dart:math';
+
 import '../model/community_post.dart';
 import '../model/post_category.dart';
 import '../model/community_comment.dart';
-
+import '../../../core/services/firebase_service.dart';
 abstract class CommunityRepository {
   Future<List<CommunityPost>> fetchPosts({String? query, PostCategory? category});
   Future<CommunityPost?> getPostById(int id);
@@ -13,72 +15,65 @@ abstract class CommunityRepository {
   Future<CommunityComment> addComment(int postId, String author, String content);
   Future<void> deleteComment(int postId, int commentId);
 
-// ▼▼▼ 여기부터 추가 ▼▼▼
-  /// 상세 진입 시 조회수 +1 하고 갱신된 포스트 반환
   Future<CommunityPost?> incrementViews(int postId);
-
-  /// 댓글 좋아요 수 증감 (increment=true면 +1, false면 -1 최소 0 보장)
   Future<CommunityComment?> likeComment(int postId, int commentId, {bool increment = true});
-
-  /// 댓글 내용/작성자 수정 (id로 찾아 업데이트)
   Future<CommunityComment?> updateComment(CommunityComment comment);
-  // ▲▲▲ 여기까지 추가 ▲▲▲
-  
 }
 
 class InMemoryCommunityRepository implements CommunityRepository {
-  int _postAutoId = 3;
-  int _cmtAutoId = 3;
+  int _postAutoId = 0;
+  int _cmtAutoId = 0;
 
-  final List<CommunityPost> _posts = [
-    CommunityPost(
-      id: 1,
-      title: '업데이트 안내',
-      content: '신규 이벤트 시작! 버그 수정.',
-      author: '운영팀',
-      createdAt: DateTime(2025, 10, 29),
-      category: PostCategory.event,
-      views: 321,
-      commentCount: 2,
-    ),
-    CommunityPost(
-      id: 2,
-      title: '서버 점검 공지',
-      content: '10/26(토) 02:00~06:00 점검 예정.',
-      author: '운영팀',
-      createdAt: DateTime(2025, 10, 25),
-      category: PostCategory.maintenance,
-      views: 210,
-      commentCount: 1,
-    ),
-    CommunityPost(
-      id: 3,
-      title: '자유게시판 이용 안내',
-      content: '욕설/비방 금지, 매너 댓글 부탁드립니다.',
-      author: '운영팀',
-      createdAt: DateTime(2025, 10, 20),
-      category: PostCategory.general,
-      views: 120,
-      commentCount: 0,
-    ),
-  ];
+  final List<CommunityPost> _posts = [];
+  final Map<int, List<CommunityComment>> _comments = {};
 
-  // postId -> comments
-  final Map<int, List<CommunityComment>> _comments = {
-    1: [
-      CommunityComment(
-        id: 1, postId: 1, author: '유저A',
-        content: '기대됩니다!', createdAt: DateTime(2025, 10, 29, 10, 0)),
-      CommunityComment(
-        id: 2, postId: 1, author: '유저B',
-        content: '수고하세요~', createdAt: DateTime(2025, 10, 29, 10, 5)),
-    ],
-    2: [
-      CommunityComment(
-        id: 3, postId: 2, author: '유저C',
-        content: '점검 길지 않길..', createdAt: DateTime(2025, 10, 25, 9, 0)),
-    ],
-  };
+  // 🔥 Firestore → 메모리로 한번 싹 가져오는 초기화 함수
+  Future<void> loadFromFirestore() async {
+    // 1) 게시글 전부 가져오기 (mapper까지 끝난 상태로 들어옴)
+    final remotePosts = await FirestoreService.fetchAllCommunityPosts(limit: 100);
+
+    // 2) 필요하면 댓글도 Firestore에서 가져와서 넣을 수 있음
+    //    지금은 예시로 "댓글은 아직 안쓴다" 가정하고 빈 리스트.
+    //    나중에 FirestoreService에 fetchAllComments() 같은 거 만들면 여기서 같이 호출하면 됨.
+    final List<CommunityComment> remoteComments = const [];
+
+    _replaceWithRemoteData(
+      posts: remotePosts,
+      comments: remoteComments,
+    );
+  }
+
+  /// 내부 캐시 교체 함수 (외부에서는 loadFromFirestore만 쓰면 됨)
+  void _replaceWithRemoteData({
+    required List<CommunityPost> posts,
+    required List<CommunityComment> comments,
+  }) {
+    // posts 세팅
+    _posts
+      ..clear()
+      ..addAll(posts);
+
+    if (_posts.isEmpty) {
+      _postAutoId = 0;
+    } else {
+      _postAutoId = _posts.map((p) => p.id).reduce(max);
+    }
+
+    // comments 세팅 (postId 기준으로 그룹)
+    _comments.clear();
+    for (final c in comments) {
+      final list = _comments.putIfAbsent(c.postId, () => <CommunityComment>[]);
+      list.add(c);
+    }
+
+    if (comments.isEmpty) {
+      _cmtAutoId = 0;
+    } else {
+      _cmtAutoId = comments.map((c) => c.id).reduce(max);
+    }
+  }
+
+  // ───────── 이하 기존 메서드들은 그대로 ─────────
 
   @override
   Future<List<CommunityPost>> fetchPosts({String? query, PostCategory? category}) async {
@@ -93,7 +88,6 @@ class InMemoryCommunityRepository implements CommunityRepository {
           p.title.toLowerCase().contains(q) ||
           p.content.toLowerCase().contains(q));
     }
-    // 최신순
     final list = it.toList()..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     return list;
   }
@@ -149,7 +143,6 @@ class InMemoryCommunityRepository implements CommunityRepository {
     );
     _comments.putIfAbsent(postId, () => []).add(c);
 
-    // 댓글 수 반영
     final idx = _posts.indexWhere((p) => p.id == postId);
     if (idx >= 0) {
       final cur = _posts[idx];
@@ -164,7 +157,6 @@ class InMemoryCommunityRepository implements CommunityRepository {
     final list = _comments[postId];
     if (list == null) return;
 
-    // 삭제 전/후 길이 차이로 removed 계산
     final before = list.length;
     list.removeWhere((e) => e.id == commentId);
     final removed = before - list.length;
@@ -175,7 +167,7 @@ class InMemoryCommunityRepository implements CommunityRepository {
         final cur = _posts[idx];
         final newCount = cur.commentCount - removed;
         _posts[idx] = cur.copyWith(
-          commentCount: newCount < 0 ? 0 : newCount, // 음수 방지
+          commentCount: newCount < 0 ? 0 : newCount,
         );
       }
     }
@@ -201,7 +193,7 @@ class InMemoryCommunityRepository implements CommunityRepository {
     if (idx < 0) return null;
 
     final cur = list[idx];
-    final nextLikes = (increment ? cur.likes + 1 : cur.likes - 1);
+    final nextLikes = increment ? cur.likes + 1 : cur.likes - 1;
     final updated = cur.copyWith(likes: nextLikes < 0 ? 0 : nextLikes);
     list[idx] = updated;
     return updated;
@@ -218,5 +210,4 @@ class InMemoryCommunityRepository implements CommunityRepository {
     list[idx] = comment;
     return comment;
   }
-
 }
