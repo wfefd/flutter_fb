@@ -12,7 +12,7 @@ class AuctionSearchScreen extends StatefulWidget {
 }
 
 class _AuctionSearchScreenState extends State<AuctionSearchScreen> {
-  // TODO: 나중에 실제 서버/레포에서 가져오면 됨.
+  //
   // 일단은 EquipmentTab에서 쓰던 더미 데이터 재사용
   final List<Map<String, dynamic>> _equipmentList = [
     {

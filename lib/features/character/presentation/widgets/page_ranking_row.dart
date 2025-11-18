@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_fb/core/theme/app_colors.dart';
 import 'package:flutter_fb/core/theme/app_text_styles.dart';
 
+import '../../models/ranking_row.dart';
+
 class RankingTableContainer extends StatelessWidget {
   final String titleDate;
   final String serverName;
-  final List<Map<String, dynamic>> rows;
-  final VoidCallback? onMoreTap; // ✅ 콜백 추가
+  final List<RankingRow> rows; // ✅ Map 제거, 모델 사용
+  final VoidCallback? onMoreTap;
 
   const RankingTableContainer({
     super.key,
@@ -31,7 +33,7 @@ class RankingTableContainer extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // ✅ 제목 영역
+          // 제목 영역
           Padding(
             padding: const EdgeInsets.all(12),
             child: Row(
@@ -73,7 +75,7 @@ class RankingTableContainer extends StatelessWidget {
             ),
           ),
 
-          // ✅ 헤더 행
+          // 헤더 행
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
             color: const Color(0xFFF7F7F7),
@@ -102,14 +104,9 @@ class RankingTableContainer extends StatelessWidget {
 
           const Divider(height: 1, color: Color(0xFFEAEAEA)),
 
-          // ✅ 데이터 리스트
+          // 데이터 리스트
           Column(
-            children: rows.map((e) {
-              final rank = e['rank'] as int;
-              final name = e['name'] as String;
-              final level = e['level'] as int;
-              final job = e['job'] as String;
-
+            children: rows.map((row) {
               return Column(
                 children: [
                   Container(
@@ -122,13 +119,13 @@ class RankingTableContainer extends StatelessWidget {
                         SizedBox(
                           width: 20,
                           height: 24,
-                          child: _RankBadge(rank: rank),
+                          child: _RankBadge(rank: row.rank),
                         ),
                         const SizedBox(width: 4),
                         Expanded(
                           flex: 4,
                           child: Text(
-                            name,
+                            row.name,
                             style: AppTextStyles.body2.copyWith(
                               color: AppColors.primaryText,
                             ),
@@ -137,7 +134,7 @@ class RankingTableContainer extends StatelessWidget {
                         Expanded(
                           flex: 2,
                           child: Text(
-                            '$level',
+                            '${row.fame}', // ✅ 명성
                             style: AppTextStyles.body2.copyWith(
                               color: AppColors.secondaryText,
                             ),
@@ -148,7 +145,7 @@ class RankingTableContainer extends StatelessWidget {
                           child: Align(
                             alignment: Alignment.centerRight,
                             child: Text(
-                              job,
+                              row.job,
                               style: AppTextStyles.body2.copyWith(
                                 color: AppColors.secondaryText,
                               ),

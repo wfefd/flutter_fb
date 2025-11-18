@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../../../../core/theme/app_colors.dart';
-import '../../../../../core/widgets/custom_container_divided.dart';
 import '../models/auction_item.dart';
 
 class AuctionItemListTab extends StatelessWidget {

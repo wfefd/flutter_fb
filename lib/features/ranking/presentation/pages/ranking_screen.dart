@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import '../../data/job_data.dart';
 import '../../widgets/ranking_list.dart';
 import '../../widgets/job_selector.dart';
-import '../../widgets/server_selector.dart'; // 🔹 추가
+import '../../widgets/server_selector.dart';
 import '../../../character/presentation/pages/character_detail_view.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../widgets/awakening_selector.dart';
+import 'package:flutter_fb/features/character/models/character.dart'; // ✅ 추가
 
 class RankingScreen extends StatefulWidget {
   const RankingScreen({super.key});
@@ -85,7 +86,6 @@ class _RankingScreenState extends State<RankingScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 🔹 서버 선택 섹션
             ServerSelector(
               servers: _servers,
               selectedServer: _selectedServer,
@@ -93,19 +93,13 @@ class _RankingScreenState extends State<RankingScreen> {
                 setState(() => _selectedServer = server);
               },
             ),
-
             const SizedBox(height: AppSpacing.lg),
-
-            // 🔹 직업 선택
             JobSelector(
               jobs: jobs,
               selectedJob: _selectedJob,
               onJobSelected: _onJobSelected,
             ),
-
             const SizedBox(height: AppSpacing.lg),
-
-            // 🔹 각성 선택
             if (_selectedJob != null)
               AwakeningSelector(
                 job: _selectedJob!,
@@ -113,10 +107,7 @@ class _RankingScreenState extends State<RankingScreen> {
                 selectedAwakening: _selectedAwakening,
                 onAwakeningSelected: _onAwakeningSelected,
               ),
-
             const SizedBox(height: AppSpacing.md),
-
-            // 🔹 랭킹 리스트
             if (_selectedJob != null && _selectedAwakening != null)
               RankingList(
                 job: _selectedJob!,
@@ -128,19 +119,30 @@ class _RankingScreenState extends State<RankingScreen> {
                           r['server'] == _selectedServer,
                     )
                     .toList(),
-                onTapCharacter: (character) {
+                onTapCharacter: (characterMap) {
+                  final c = Character(
+                    id: 'rank_${characterMap['rank']}',
+                    name: characterMap['name'] as String? ?? 'Unknown',
+                    job: characterMap['class'] as String? ?? '',
+                    level: characterMap['level'] as int? ?? 0,
+                    server: characterMap['server'] as String? ?? '',
+                    imagePath:
+                        characterMap['image'] as String? ??
+                        'assets/images/character1.png',
+                    fame:
+                        (characterMap['power'] ?? characterMap['score'] ?? '0')
+                            .toString(),
+                  );
+
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => CharacterDetailView(
-                        character: character,
-                        fromRanking: true,
-                      ),
+                      builder: (_) =>
+                          CharacterDetailView(character: c, fromRanking: true),
                     ),
                   );
                 },
               ),
-
             const SizedBox(height: AppSpacing.xl),
           ],
         ),

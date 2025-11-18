@@ -3,9 +3,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../models/character.dart';
 
 class CharacterCard extends StatelessWidget {
-  final Map<String, dynamic> character;
+  final Character character;
   final VoidCallback onTap;
 
   const CharacterCard({
@@ -45,7 +46,7 @@ class CharacterCard extends StatelessWidget {
                 borderRadius: AppRadius.small,
               ),
               child: Text(
-                c['class'] ?? '',
+                c.job,
                 style: AppTextStyles.body2.copyWith(
                   fontWeight: FontWeight.w500,
                   color: AppColors.secondaryText,
@@ -56,14 +57,16 @@ class CharacterCard extends StatelessWidget {
             const SizedBox(height: 4),
 
             // ✅ 서버명
-            Text(c['server'] ?? '', style: AppTextStyles.body2),
+            Text(c.server, style: AppTextStyles.body2),
 
             const SizedBox(height: AppSpacing.sm),
 
             // ✅ 캐릭터 이미지
             Expanded(
               child: Image.asset(
-                c['image'] ?? 'assets/images/no_image.png',
+                c.imagePath.isNotEmpty
+                    ? c.imagePath
+                    : 'assets/images/no_image.png',
                 fit: BoxFit.contain,
               ),
             ),
@@ -71,7 +74,7 @@ class CharacterCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.sm),
 
             // ✅ 닉네임
-            Text(c['name'] ?? '', style: AppTextStyles.subtitle),
+            Text(c.name, style: AppTextStyles.subtitle),
 
             const SizedBox(height: 2),
 
@@ -82,7 +85,7 @@ class CharacterCard extends StatelessWidget {
                 Image.asset('assets/images/fame.png', width: 16, height: 16),
                 const SizedBox(width: 4),
                 Text(
-                  c['power'] ?? '0',
+                  c.fame,
                   style: AppTextStyles.body2.copyWith(
                     fontSize: 13,
                     color: AppColors.primaryText,

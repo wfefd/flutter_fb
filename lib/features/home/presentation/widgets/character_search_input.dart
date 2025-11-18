@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/widgets/custom_dropdown.dart';
-import '../../../character/presentation/widgets/search_text_field.dart';
+import '../../../character/presentation/widgets/page_search_text_field.dart';
 
 class CharacterSearchInput extends StatelessWidget {
   final String selectedServer;

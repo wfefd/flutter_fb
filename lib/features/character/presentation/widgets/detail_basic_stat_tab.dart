@@ -1,72 +1,104 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_container_divided.dart';
+import '../../models/basic_stat.dart';
 
 class StatTab extends StatelessWidget {
   const StatTab({super.key});
 
+  // ✅ 더 이상 Map이 아니라 BasicStat 리스트
+  List<BasicStat> get _stats => const [
+    BasicStat(
+      iconPath: 'assets/images/stat/defense.png',
+      name: '물리방어율',
+      value: '47.3',
+    ),
+    BasicStat(
+      iconPath: 'assets/images/stat/mdefense.png',
+      name: '마법방어율',
+      value: '48.7',
+    ),
+    BasicStat(iconPath: 'assets/images/stat/str.png', name: '힘', value: '8144'),
+    BasicStat(
+      iconPath: 'assets/images/stat/int.png',
+      name: '지능',
+      value: '4524',
+    ),
+    BasicStat(
+      iconPath: 'assets/images/stat/vit.png',
+      name: '체력',
+      value: '4481',
+    ),
+    BasicStat(
+      iconPath: 'assets/images/stat/spi.png',
+      name: '정신력',
+      value: '4341',
+    ),
+    BasicStat(
+      iconPath: 'assets/images/stat/patk.png',
+      name: '물리공격',
+      value: '5887',
+    ),
+    BasicStat(
+      iconPath: 'assets/images/stat/matk.png',
+      name: '마법공격',
+      value: '5276',
+    ),
+    BasicStat(
+      iconPath: 'assets/images/stat/pcrit.png',
+      name: '물크',
+      value: '82.5 (122.5%)',
+    ),
+    BasicStat(
+      iconPath: 'assets/images/stat/mcrit.png',
+      name: '마크',
+      value: '72.5 (112.5%)',
+    ),
+    BasicStat(
+      iconPath: 'assets/images/stat/independent.png',
+      name: '독립공격',
+      value: '3381',
+    ),
+    BasicStat(
+      iconPath: 'assets/images/stat/adventurer.png',
+      name: '모험가명성',
+      value: '82370',
+    ),
+    BasicStat(
+      iconPath: 'assets/images/stat/aspd.png',
+      name: '공격속도',
+      value: '94.5',
+    ),
+    BasicStat(
+      iconPath: 'assets/images/stat/cspd.png',
+      name: '캐스팅속도',
+      value: '89.5',
+    ),
+    BasicStat(
+      iconPath: 'assets/images/stat/fire.png',
+      name: '화속성강화',
+      value: '301 (431)',
+    ),
+    BasicStat(
+      iconPath: 'assets/images/stat/water.png',
+      name: '수속성강화',
+      value: '301 (431)',
+    ),
+    BasicStat(
+      iconPath: 'assets/images/stat/light.png',
+      name: '명속성강화',
+      value: '311 (441)',
+    ),
+    BasicStat(
+      iconPath: 'assets/images/stat/dark.png',
+      name: '암속성강화',
+      value: '301 (431)',
+    ),
+  ];
+
   @override
   Widget build(BuildContext context) {
-    final List<Map<String, dynamic>> stats = [
-      {
-        'icon': 'assets/images/stat/defense.png',
-        'name': '물리방어율',
-        'value': '47.3',
-      },
-      {
-        'icon': 'assets/images/stat/mdefense.png',
-        'name': '마법방어율',
-        'value': '48.7',
-      },
-      {'icon': 'assets/images/stat/str.png', 'name': '힘', 'value': '8144'},
-      {'icon': 'assets/images/stat/int.png', 'name': '지능', 'value': '4524'},
-      {'icon': 'assets/images/stat/vit.png', 'name': '체력', 'value': '4481'},
-      {'icon': 'assets/images/stat/spi.png', 'name': '정신력', 'value': '4341'},
-      {'icon': 'assets/images/stat/patk.png', 'name': '물리공격', 'value': '5887'},
-      {'icon': 'assets/images/stat/matk.png', 'name': '마법공격', 'value': '5276'},
-      {
-        'icon': 'assets/images/stat/pcrit.png',
-        'name': '물크',
-        'value': '82.5 (122.5%)',
-      },
-      {
-        'icon': 'assets/images/stat/mcrit.png',
-        'name': '마크',
-        'value': '72.5 (112.5%)',
-      },
-      {
-        'icon': 'assets/images/stat/independent.png',
-        'name': '독립공격',
-        'value': '3381',
-      },
-      {
-        'icon': 'assets/images/stat/adventurer.png',
-        'name': '모험가명성',
-        'value': '82370',
-      },
-      {'icon': 'assets/images/stat/aspd.png', 'name': '공격속도', 'value': '94.5'},
-      {'icon': 'assets/images/stat/cspd.png', 'name': '캐스팅속도', 'value': '89.5'},
-      {
-        'icon': 'assets/images/stat/fire.png',
-        'name': '화속성강화',
-        'value': '301 (431)',
-      },
-      {
-        'icon': 'assets/images/stat/water.png',
-        'name': '수속성강화',
-        'value': '301 (431)',
-      },
-      {
-        'icon': 'assets/images/stat/light.png',
-        'name': '명속성강화',
-        'value': '311 (441)',
-      },
-      {
-        'icon': 'assets/images/stat/dark.png',
-        'name': '암속성강화',
-        'value': '301 (431)',
-      },
-    ];
+    final stats = _stats;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -104,7 +136,7 @@ class StatTab extends StatelessWidget {
     );
   }
 
-  Widget _buildStatBox(Map<String, dynamic> stat) {
+  Widget _buildStatBox(BasicStat stat) {
     return Container(
       height: 42,
       decoration: BoxDecoration(
@@ -119,7 +151,7 @@ class StatTab extends StatelessWidget {
           Row(
             children: [
               Image.asset(
-                stat['icon'],
+                stat.iconPath,
                 width: 18,
                 height: 18,
                 errorBuilder: (_, __, ___) =>
@@ -127,7 +159,7 @@ class StatTab extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Text(
-                stat['name'],
+                stat.name,
                 style: const TextStyle(
                   fontSize: 13,
                   color: AppColors.primaryText,
@@ -137,7 +169,7 @@ class StatTab extends StatelessWidget {
             ],
           ),
           Text(
-            stat['value'],
+            stat.value,
             style: const TextStyle(
               fontSize: 13,
               color: AppColors.primaryText,

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_fb/features/home/presentation/widgets/bottom_nav_bar.dart';
 import 'package:flutter_fb/features/home/presentation/widgets/top_app_bar.dart';
 import 'package:flutter_fb/features/home/presentation/widgets/tab_bar.dart';
-import '../../character/presentation/pages/character_search_tab.dart';
+import '../../character/presentation/pages/character_search_page.dart';
 import '../../auction/presentation/auction_screen.dart';
 import '../../board/presentation/board_list_screen.dart';
 import '../../community/presentation/community_list_screen.dart';
@@ -46,18 +46,16 @@ class _HomeScreenState extends State<HomeScreen> {
             Expanded(
               child: TabBarView(
                 children: [
-                  // ✅ Builder는 그대로 유지 (탭 이동용 context)
+                  // 🔥 여기: CharacterSearchTab은 BaseScreen 안 씌운다
                   Builder(
-                    builder: (innerContext) => BaseScreen(
-                      child: CharacterSearchTab(
-                        onTabChange: (index) {
-                          DefaultTabController.of(
-                            innerContext,
-                          )?.animateTo(index);
-                        },
-                      ),
+                    builder: (innerContext) => CharacterSearchTab(
+                      onTabChange: (index) {
+                        DefaultTabController.of(innerContext)?.animateTo(index);
+                      },
                     ),
                   ),
+
+                  // 나머지 탭은 그대로 BaseScreen 써도 됨
                   const BaseScreen(child: RankingScreen()),
                   const AuctionScreen(),
                   const CommunityListScreen(),

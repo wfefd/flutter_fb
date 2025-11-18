@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../models/equipment_item.dart';
 import '../../../../core/widgets/custom_container_divided.dart';
 
 class EquipmentTab extends StatelessWidget {
   EquipmentTab({super.key});
 
+  // 등급 → 색 매핑은 프론트에서
   Color _getGradeColor(String grade) {
     switch (grade.toLowerCase()) {
       case 'common':
@@ -30,128 +32,116 @@ class EquipmentTab extends StatelessWidget {
         return const Color(0xFFFFD700); // 금색
       case 'primeval':
       default:
-        return AppColors.primaryText; // 혹시나 등급 누락될 경우 기본 텍스트색
+        return AppColors.primaryText;
     }
   }
 
-  final List<Map<String, dynamic>> equipmentList = [
-    {
-      'category': '세트',
-      'image': 'assets/images/sample_weapon.png',
-      'name': '멸룡 세트',
-      'grade': '레전더리', // 영웅 → 레전더리
-      'option': '+3 세트효과',
-      'optionColor': Colors.blue,
-      'desc': '모속강 +20, 피해 증가 +10%',
-    },
-    {
-      'category': '무기',
-      'image': 'assets/images/sample_weapon.png',
-      'name': '멸룡검 발몽',
-      'grade': '일반', // 0 → 일반
-      'option': '+15 증폭',
-      'optionColor': Colors.purple,
-      'desc': '모속강 +15 공격력 +30',
-    },
-    {
-      'category': '칭호',
-      'image': 'assets/images/sample_weapon.png',
-      'name': '영광의 칭호',
-      'grade': '에픽',
-      'option': '+2 버프레벨',
-      'optionColor': Colors.orange,
-      'desc': '모든 공격력 +10%',
-    },
-    {
-      'category': '상의',
-      'image': 'assets/images/sample_weapon.png',
-      'name': '멸룡의 흉갑',
-      'grade': 'rare', // 영원 → 태초
-      'option': '+15 강화',
-      'optionColor': Colors.orange,
-      'desc': '공격속도 +5%, 크리티컬 +3%',
-    },
-    {
-      'category': '머리어깨',
-      'image': 'assets/images/sample_weapon.png',
-      'name': '멸룡의 어깨',
-      'grade': '태초',
-      'option': '+12 강화',
-      'optionColor': Colors.orange,
-      'desc': '피해 증가 +5%',
-    },
-    {
-      'category': '하의',
-      'image': 'assets/images/sample_weapon.png',
-      'name': '멸룡의 하의',
-      'grade': '태초',
-      'option': '+13 강화',
-      'optionColor': Colors.orange,
-      'desc': '모속강 +10',
-    },
-    {
-      'category': '신발',
-      'image': 'assets/images/sample_weapon.png',
-      'name': '멸룡의 부츠',
-      'grade': '태초',
-      'option': '+10 강화',
-      'optionColor': Colors.orange,
-      'desc': '이동속도 +8%',
-    },
-    {
-      'category': '벨트',
-      'image': 'assets/images/sample_weapon.png',
-      'name': '멸룡의 벨트',
-      'grade': '태초',
-      'option': '+11 강화',
-      'optionColor': Colors.orange,
-      'desc': '공격속도 +3%',
-    },
-    {
-      'category': '목걸이',
-      'image': 'assets/images/sample_weapon.png',
-      'name': '멸룡의 목걸이',
-      'grade': '태초',
-      'option': '+14 강화',
-      'optionColor': Colors.orange,
-      'desc': '모속강 +5',
-    },
-    {
-      'category': '팔찌',
-      'image': 'assets/images/sample_weapon.png',
-      'name': '멸룡의 팔찌',
-      'grade': '태초',
-      'option': '+15 강화',
-      'optionColor': Colors.orange,
-      'desc': '물리 공격력 +5%',
-    },
-    {
-      'category': '반지',
-      'image': 'assets/images/sample_weapon.png',
-      'name': '멸룡의 반지',
-      'grade': '태초',
-      'option': '+15 강화',
-      'optionColor': Colors.orange,
-      'desc': '마법 공격력 +5%',
-    },
-    {
-      'category': '보조장비',
-      'image': 'assets/images/sample_weapon.png',
-      'name': '멸룡의 부적',
-      'grade': '태초',
-      'option': '+10 강화',
-      'optionColor': Colors.orange,
-      'desc': '크리티컬 +3%',
-    },
-    {
-      'category': '마법석',
-      'image': 'assets/images/sample_weapon.png',
-      'name': '멸룡의 마석',
-      'grade': '태초',
-      'option': '+15 강화',
-      'optionColor': Colors.orange,
-      'desc': '속성 피해 +7%',
-    },
+  // ✅ 모델만 들고 있는 더미 데이터 (Color 없음)
+  final List<EquipmentItem> equipmentList = const [
+    EquipmentItem(
+      category: '세트',
+      imagePath: 'assets/images/sample_weapon.png',
+      name: '멸룡 세트',
+      grade: '레전더리',
+      option: '+3 세트효과',
+      desc: '모속강 +20, 피해 증가 +10%',
+    ),
+    EquipmentItem(
+      category: '무기',
+      imagePath: 'assets/images/sample_weapon.png',
+      name: '멸룡검 발몽',
+      grade: '일반',
+      option: '+15 증폭',
+      desc: '모속강 +15 공격력 +30',
+    ),
+    EquipmentItem(
+      category: '칭호',
+      imagePath: 'assets/images/sample_weapon.png',
+      name: '영광의 칭호',
+      grade: '에픽',
+      option: '+2 버프레벨',
+      desc: '모든 공격력 +10%',
+    ),
+    EquipmentItem(
+      category: '상의',
+      imagePath: 'assets/images/sample_weapon.png',
+      name: '멸룡의 흉갑',
+      grade: 'rare',
+      option: '+15 강화',
+      desc: '공격속도 +5%, 크리티컬 +3%',
+    ),
+    EquipmentItem(
+      category: '머리어깨',
+      imagePath: 'assets/images/sample_weapon.png',
+      name: '멸룡의 어깨',
+      grade: '태초',
+      option: '+12 강화',
+      desc: '피해 증가 +5%',
+    ),
+    EquipmentItem(
+      category: '하의',
+      imagePath: 'assets/images/sample_weapon.png',
+      name: '멸룡의 하의',
+      grade: '태초',
+      option: '+13 강화',
+      desc: '모속강 +10',
+    ),
+    EquipmentItem(
+      category: '신발',
+      imagePath: 'assets/images/sample_weapon.png',
+      name: '멸룡의 부츠',
+      grade: '태초',
+      option: '+10 강화',
+      desc: '이동속도 +8%',
+    ),
+    EquipmentItem(
+      category: '벨트',
+      imagePath: 'assets/images/sample_weapon.png',
+      name: '멸룡의 벨트',
+      grade: '태초',
+      option: '+11 강화',
+      desc: '공격속도 +3%',
+    ),
+    EquipmentItem(
+      category: '목걸이',
+      imagePath: 'assets/images/sample_weapon.png',
+      name: '멸룡의 목걸이',
+      grade: '태초',
+      option: '+14 강화',
+      desc: '모속강 +5',
+    ),
+    EquipmentItem(
+      category: '팔찌',
+      imagePath: 'assets/images/sample_weapon.png',
+      name: '멸룡의 팔찌',
+      grade: '태초',
+      option: '+15 강화',
+      desc: '물리 공격력 +5%',
+    ),
+    EquipmentItem(
+      category: '반지',
+      imagePath: 'assets/images/sample_weapon.png',
+      name: '멸룡의 반지',
+      grade: '태초',
+      option: '+15 강화',
+      desc: '마법 공격력 +5%',
+    ),
+    EquipmentItem(
+      category: '보조장비',
+      imagePath: 'assets/images/sample_weapon.png',
+      name: '멸룡의 부적',
+      grade: '태초',
+      option: '+10 강화',
+      desc: '크리티컬 +3%',
+    ),
+    EquipmentItem(
+      category: '마법석',
+      imagePath: 'assets/images/sample_weapon.png',
+      name: '멸룡의 마석',
+      grade: '태초',
+      option: '+15 강화',
+      desc: '속성 피해 +7%',
+    ),
   ];
 
   @override
@@ -168,7 +158,8 @@ class EquipmentTab extends StatelessWidget {
           ),
         ),
         children: equipmentList.map((item) {
-          final gradeColor = _getGradeColor(item['grade'] ?? '');
+          final gradeColor = _getGradeColor(item.grade);
+
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 5),
             child: Container(
@@ -186,7 +177,7 @@ class EquipmentTab extends StatelessWidget {
                   SizedBox(
                     width: 55,
                     child: Text(
-                      item['category'],
+                      item.category,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 13,
@@ -198,7 +189,7 @@ class EquipmentTab extends StatelessWidget {
 
                   // 이미지
                   Image.asset(
-                    item['image'],
+                    item.imagePath,
                     width: 36,
                     height: 36,
                     fit: BoxFit.cover,
@@ -215,40 +206,38 @@ class EquipmentTab extends StatelessWidget {
                           children: [
                             Expanded(
                               child: Text(
-                                item['name'],
+                                item.name,
                                 style: TextStyle(
                                   fontWeight: FontWeight.bold,
                                   fontSize: 13,
-                                  color: gradeColor, // ← 등급 색상을 이름에도 적용
+                                  color: gradeColor, // 등급 색 → 이름에 적용
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              item['grade'],
-                              style: TextStyle(
+                              item.grade,
+                              style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
-                                color: const Color(
-                                  0xFFFFD700,
-                                ), // ← 여기! 등급 색상 적용
+                                color: Color(0xFFFFD700), // 등급 라벨은 고정 색
                               ),
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              item['option'],
-                              style: TextStyle(
+                              item.option,
+                              style: const TextStyle(
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
-                                color: item['optionColor'],
+                                color: Colors.orange, // 옵션 색도 프론트에서 고정
                               ),
                             ),
                           ],
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          item['desc'],
+                          item.desc,
                           style: const TextStyle(
                             fontSize: 11,
                             color: AppColors.secondaryText,

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
-import '../widgets/character_card.dart';
+
+import '../../models/character.dart';
+import '../widgets/result_character_card.dart';
 
 class CharacterSearchResult extends StatelessWidget {
   final String query;
-  final List<Map<String, dynamic>> results;
-  final ValueChanged<Map<String, dynamic>> onCharacterSelected;
+  final List<Character> results;
+  final ValueChanged<Character> onCharacterSelected;
 
   const CharacterSearchResult({
     super.key,
@@ -15,9 +17,7 @@ class CharacterSearchResult extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return
-    // 🔹 혹시 CharacterSearchTab에서 SafeArea 빼도 여기에 있어 안전
-    Padding(
+    return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -41,7 +41,6 @@ class CharacterSearchResult extends StatelessWidget {
             ),
           ),
           Expanded(
-            // 🔹 여기가 핵심
             child: results.isEmpty
                 ? const Center(
                     child: Text(
@@ -59,10 +58,10 @@ class CharacterSearchResult extends StatelessWidget {
                         ),
                     itemCount: results.length,
                     itemBuilder: (context, index) {
-                      final c = results[index];
+                      final character = results[index]; // ✅ Character
                       return CharacterCard(
-                        character: c,
-                        onTap: () => onCharacterSelected(c),
+                        character: character,
+                        onTap: () => onCharacterSelected(character),
                       );
                     },
                   ),

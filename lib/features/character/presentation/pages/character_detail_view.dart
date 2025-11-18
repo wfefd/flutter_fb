@@ -1,15 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_fb/core/theme/app_colors.dart';
 import 'package:flutter_fb/core/theme/app_text_styles.dart';
-import 'package:flutter_fb/features/character/presentation/widgets/buff_tab.dart';
+import 'package:flutter_fb/features/character/models/character.dart';
+
+import 'package:flutter_fb/features/character/presentation/widgets/detail_buff_tab.dart';
 import 'package:flutter_fb/features/character/presentation/widgets/skill_bloom_tab.dart';
-import '../widgets/equipment_tab.dart';
-import '../widgets/stat_tab.dart';
-import '../widgets/detail_stat_tab.dart';
+import '../widgets/detail_equipment_tab.dart'; // ✅ 장비 탭: EquipmentTab
+import '../widgets/detail_basic_stat_tab.dart';
+import '../widgets/detail_detail_stat_tab.dart';
 import '../widgets/avatar_creature_tab.dart';
 
 class CharacterDetailView extends StatefulWidget {
-  final Map<String, dynamic> character;
+  final Character character;
   final bool fromRanking;
 
   const CharacterDetailView({
@@ -49,18 +51,17 @@ class _CharacterDetailViewState extends State<CharacterDetailView>
       backgroundColor: AppColors.background,
       appBar: widget.fromRanking
           ? AppBar(
-              title: Text(c['name'] ?? '캐릭터 정보', style: AppTextStyles.subtitle),
+              title: Text(c.name, style: AppTextStyles.subtitle),
               backgroundColor: AppColors.surface,
               foregroundColor: AppColors.primaryText,
               leading: IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new),
-                iconSize: 18, // 👈 아이콘 크기 줄이기
+                iconSize: 18,
                 onPressed: () => Navigator.pop(context),
               ),
               elevation: 1,
             )
           : null,
-
       body: Column(
         children: [
           _buildCharacterInfo(c),
@@ -73,7 +74,7 @@ class _CharacterDetailViewState extends State<CharacterDetailView>
     );
   }
 
-  Widget _buildCharacterInfo(Map<String, dynamic> c) {
+  Widget _buildCharacterInfo(Character c) {
     return Padding(
       padding: const EdgeInsets.all(12),
       child: Row(
@@ -81,25 +82,25 @@ class _CharacterDetailViewState extends State<CharacterDetailView>
           ClipRRect(
             borderRadius: BorderRadius.circular(8),
             child: Image.asset(
-              c['image'] ?? 'assets/images/no_image.png',
+              c.imagePath.isNotEmpty
+                  ? c.imagePath
+                  : 'assets/images/no_image.png',
               width: 216,
               height: 216,
               fit: BoxFit.cover,
               cacheWidth: 240,
             ),
           ),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(c['name'] ?? 'Unknown', style: AppTextStyles.h2),
+                Text(c.name, style: AppTextStyles.h2),
                 const SizedBox(height: 4),
-                Text(
-                  '${c['class'] ?? ''} | ${c['server'] ?? ''}',
-                  style: AppTextStyles.body2,
-                ),
+                Text('${c.job} | ${c.server}', style: AppTextStyles.body2),
                 const SizedBox(height: 4),
-                Text('Lv.${c['level'] ?? 0}', style: AppTextStyles.body2),
+                Text('Lv.${c.level}', style: AppTextStyles.body2),
                 const SizedBox(height: 4),
                 Row(
                   children: [
@@ -110,7 +111,7 @@ class _CharacterDetailViewState extends State<CharacterDetailView>
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      c['power'] ?? '0',
+                      c.fame,
                       style: AppTextStyles.subtitle.copyWith(
                         color: AppColors.secondaryText,
                       ),
@@ -167,22 +168,22 @@ class _CharacterDetailViewState extends State<CharacterDetailView>
 
     switch (i) {
       case 0:
-        _builtTabs[i] = EquipmentTab();
+        _builtTabs[i] = EquipmentTab(); // 장착장비
         break;
       case 1:
-        _builtTabs[i] = const StatTab();
+        _builtTabs[i] = const StatTab(); // 스탯
         break;
       case 2:
-        _builtTabs[i] = const DetailStatTab();
+        _builtTabs[i] = const DetailStatTab(); // 세부스탯
         break;
       case 3:
-        _builtTabs[i] = const AvatarCreatureTab();
+        _builtTabs[i] = const AvatarCreatureTab(); // 아바타&크리쳐
         break;
       case 4:
-        _builtTabs[i] = const BuffTab();
+        _builtTabs[i] = const BuffTab(); // 버프강화
         break;
       case 5:
-        _builtTabs[i] = const SkillBloomTab();
+        _builtTabs[i] = const SkillBloomTab(); // 스킬개화
         break;
       default:
         _builtTabs[i] = FutureBuilder<String>(

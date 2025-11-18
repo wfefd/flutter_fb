@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
-import '../theme/app_spacing.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String text;
@@ -11,8 +10,6 @@ class PrimaryButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDisabled = onPressed == null;
-
     return SizedBox(
       height: 48,
       child: ElevatedButton(
