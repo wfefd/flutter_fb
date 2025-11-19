@@ -1,9 +1,10 @@
+// lib/features/character/presentation/widgets/result_character_card.dart
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../models/character.dart';
+import '../../models/domain/character.dart';
 
 class CharacterCard extends StatelessWidget {
   final Character character;
@@ -61,14 +62,9 @@ class CharacterCard extends StatelessWidget {
 
             const SizedBox(height: AppSpacing.sm),
 
-            // ✅ 캐릭터 이미지
+            // ✅ 캐릭터 이미지 (URL 사용으로 변경)
             Expanded(
-              child: Image.asset(
-                c.imagePath.isNotEmpty
-                    ? c.imagePath
-                    : 'assets/images/no_image.png',
-                fit: BoxFit.contain,
-              ),
+              child: _buildCharacterImage(c), // ★ CHANGED: 분리
             ),
 
             const SizedBox(height: AppSpacing.sm),
@@ -99,6 +95,23 @@ class CharacterCard extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  // ⭐ NEW: 이미지 빌더 함수 (URL + fallback)
+  Widget _buildCharacterImage(Character c) {
+    // URL이 아예 없으면 바로 플레이스홀더
+    if (c.imagePath.isEmpty) {
+      return Image.asset('assets/images/no_image.png', fit: BoxFit.contain);
+    }
+
+    // URL 있으면 네트워크로 시도 + 실패 시 fallback
+    return Image.network(
+      c.imagePath,
+      fit: BoxFit.contain,
+      errorBuilder: (context, error, stackTrace) {
+        return Image.asset('assets/images/no_image.png', fit: BoxFit.contain);
+      },
     );
   }
 }

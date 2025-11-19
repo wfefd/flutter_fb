@@ -1,104 +1,33 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_container_divided.dart';
-import '../../models/basic_stat.dart';
+import '../../models/ui/basic_stat.dart';
 
 class StatTab extends StatelessWidget {
-  const StatTab({super.key});
+  // ❌ 예전: 고정 mock 데이터만 쓰던 버전
+  // const StatTab({super.key});
+  // List<BasicStat> get _stats => const [ ... ];
 
-  // ✅ 더 이상 Map이 아니라 BasicStat 리스트
-  List<BasicStat> get _stats => const [
-    BasicStat(
-      iconPath: 'assets/images/stat/defense.png',
-      name: '물리방어율',
-      value: '47.3',
-    ),
-    BasicStat(
-      iconPath: 'assets/images/stat/mdefense.png',
-      name: '마법방어율',
-      value: '48.7',
-    ),
-    BasicStat(iconPath: 'assets/images/stat/str.png', name: '힘', value: '8144'),
-    BasicStat(
-      iconPath: 'assets/images/stat/int.png',
-      name: '지능',
-      value: '4524',
-    ),
-    BasicStat(
-      iconPath: 'assets/images/stat/vit.png',
-      name: '체력',
-      value: '4481',
-    ),
-    BasicStat(
-      iconPath: 'assets/images/stat/spi.png',
-      name: '정신력',
-      value: '4341',
-    ),
-    BasicStat(
-      iconPath: 'assets/images/stat/patk.png',
-      name: '물리공격',
-      value: '5887',
-    ),
-    BasicStat(
-      iconPath: 'assets/images/stat/matk.png',
-      name: '마법공격',
-      value: '5276',
-    ),
-    BasicStat(
-      iconPath: 'assets/images/stat/pcrit.png',
-      name: '물크',
-      value: '82.5 (122.5%)',
-    ),
-    BasicStat(
-      iconPath: 'assets/images/stat/mcrit.png',
-      name: '마크',
-      value: '72.5 (112.5%)',
-    ),
-    BasicStat(
-      iconPath: 'assets/images/stat/independent.png',
-      name: '독립공격',
-      value: '3381',
-    ),
-    BasicStat(
-      iconPath: 'assets/images/stat/adventurer.png',
-      name: '모험가명성',
-      value: '82370',
-    ),
-    BasicStat(
-      iconPath: 'assets/images/stat/aspd.png',
-      name: '공격속도',
-      value: '94.5',
-    ),
-    BasicStat(
-      iconPath: 'assets/images/stat/cspd.png',
-      name: '캐스팅속도',
-      value: '89.5',
-    ),
-    BasicStat(
-      iconPath: 'assets/images/stat/fire.png',
-      name: '화속성강화',
-      value: '301 (431)',
-    ),
-    BasicStat(
-      iconPath: 'assets/images/stat/water.png',
-      name: '수속성강화',
-      value: '301 (431)',
-    ),
-    BasicStat(
-      iconPath: 'assets/images/stat/light.png',
-      name: '명속성강화',
-      value: '311 (441)',
-    ),
-    BasicStat(
-      iconPath: 'assets/images/stat/dark.png',
-      name: '암속성강화',
-      value: '301 (431)',
-    ),
-  ];
+  // ✅ NEW: 외부에서 스탯 리스트를 주입받음
+  final List<BasicStat> stats; // ★ NEW
+
+  const StatTab({
+    super.key,
+    required this.stats, // ★ CHANGED
+  });
 
   @override
   Widget build(BuildContext context) {
-    final stats = _stats;
+    // 혹시 null/빈 리스트면 안내만
+    if (stats.isEmpty) {
+      // ★ NEW
+      return const Center(
+        child: Text(
+          '스탯 정보가 없습니다.',
+          style: TextStyle(color: AppColors.secondaryText),
+        ),
+      );
+    }
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -111,6 +40,8 @@ class StatTab extends StatelessWidget {
             color: AppColors.primaryText,
           ),
         ),
+        // ❌ 예전: final stats = _stats;
+        // ✅ 이제는 생성자로 받은 stats 사용
         children: List.generate((stats.length / 2).ceil(), (index) {
           final left = stats[index * 2];
           final right = index * 2 + 1 < stats.length

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_fb/core/theme/app_colors.dart';
 import 'package:flutter_fb/core/theme/app_text_styles.dart';
 
-import '../../models/ranking_row.dart';
+import '../../models/domain/ranking_row.dart';
 
 class RankingTableContainer extends StatelessWidget {
   final String titleDate;
@@ -10,12 +10,16 @@ class RankingTableContainer extends StatelessWidget {
   final List<RankingRow> rows; // ✅ Map 제거, 모델 사용
   final VoidCallback? onMoreTap;
 
+  // ⭐ 추가: 각 랭킹 row 클릭 콜백
+  final void Function(RankingRow row)? onRowTap; // ★ NEW
+
   const RankingTableContainer({
     super.key,
     required this.titleDate,
     required this.serverName,
     required this.rows,
     this.onMoreTap,
+    this.onRowTap, // ★ NEW
   });
 
   @override
@@ -109,50 +113,57 @@ class RankingTableContainer extends StatelessWidget {
             children: rows.map((row) {
               return Column(
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      vertical: 6,
-                      horizontal: 16,
-                    ),
-                    child: Row(
-                      children: [
-                        SizedBox(
-                          width: 20,
-                          height: 24,
-                          child: _RankBadge(rank: row.rank),
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          flex: 4,
-                          child: Text(
-                            row.name,
-                            style: AppTextStyles.body2.copyWith(
-                              color: AppColors.primaryText,
-                            ),
+                  // ⭐ 변경: 전체 행을 InkWell로 감싸서 탭 가능하게
+                  InkWell(
+                    // ★ CHANGED
+                    onTap: onRowTap == null
+                        ? null
+                        : () => onRowTap!(row), // ★ NEW
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 6,
+                        horizontal: 16,
+                      ),
+                      child: Row(
+                        children: [
+                          SizedBox(
+                            width: 20,
+                            height: 24,
+                            child: _RankBadge(rank: row.rank),
                           ),
-                        ),
-                        Expanded(
-                          flex: 2,
-                          child: Text(
-                            '${row.fame}', // ✅ 명성
-                            style: AppTextStyles.body2.copyWith(
-                              color: AppColors.secondaryText,
-                            ),
-                          ),
-                        ),
-                        Expanded(
-                          flex: 3,
-                          child: Align(
-                            alignment: Alignment.centerRight,
+                          const SizedBox(width: 4),
+                          Expanded(
+                            flex: 4,
                             child: Text(
-                              row.job,
+                              row.name,
+                              style: AppTextStyles.body2.copyWith(
+                                color: AppColors.primaryText,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              '${row.fame}', // ✅ 명성
                               style: AppTextStyles.body2.copyWith(
                                 color: AppColors.secondaryText,
                               ),
                             ),
                           ),
-                        ),
-                      ],
+                          Expanded(
+                            flex: 3,
+                            child: Align(
+                              alignment: Alignment.centerRight,
+                              child: Text(
+                                row.job,
+                                style: AppTextStyles.body2.copyWith(
+                                  color: AppColors.secondaryText,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   Divider(height: 1, color: Colors.grey.shade200),

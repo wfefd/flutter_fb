@@ -9,7 +9,6 @@ import '../model/community_comment.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 // PrimaryButton (경로는 프로젝트 구조에 맞게 조정)
-import '../../../core/widgets/custom_button.dart';
 
 class CommunityDetailScreen extends StatefulWidget {
   final CommunityPost post;
