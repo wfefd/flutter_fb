@@ -3,11 +3,11 @@ import '../../data/job_data.dart';
 import '../../widgets/ranking_list.dart';
 import '../../widgets/job_selector.dart';
 import '../../widgets/server_selector.dart';
-import '../../../character/presentation/pages/character_detail_view.dart';
+import '../../../character/presentation/pages/character_detail_page.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../widgets/awakening_selector.dart';
-import 'package:flutter_fb/features/character/models/character.dart'; // ✅ 추가
+import 'package:flutter_fb/features/character/models/domain/character.dart'; // ✅ 추가
 
 class RankingScreen extends StatefulWidget {
   const RankingScreen({super.key});
