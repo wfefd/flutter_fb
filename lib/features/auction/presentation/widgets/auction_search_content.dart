@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/custom_container_divided.dart';
 import '../../models/auction_item.dart'; // 화면용 AuctionItem (id, price, seller…)
-import '../../data/auction_item_data.dart'
+import '../../models/auction_item_data.dart'
     as src; // 상세용 하드코딩 데이터(kAuctionItems)
 
 class AuctionSearchContent extends StatefulWidget {

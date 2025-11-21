@@ -4,7 +4,7 @@ import '../models/auction_item.dart';
 import '../models/item_price.dart';
 
 // ✅ 하드코딩 데이터(Dart) - kAuctionItems, RarityCode 등
-import '../data/auction_item_data.dart' as data;
+import '../models/auction_item_data.dart' as data;
 
 /// ─────────────────────────────────────────────────────────────────
 /// 레포지토리 인터페이스

@@ -4,7 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 
 import '../models/auction_item.dart';
-import '../data/auction_item_data.dart' as src;
+import '../models/auction_item_data.dart' as src;
 import 'widgets/price_line_chart.dart';
 
 class AuctionItemDetailScreen extends StatefulWidget {

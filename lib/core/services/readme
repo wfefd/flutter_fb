@@ -1,0 +1,294 @@
+FirestoreService 사용 요약
+공통
+
+1. 공지사항(Notice)
+1-1. 목록 가져오기
+final notices = await FirestoreService.fetchNotices(
+  category: NoticeCategory.event, // 또는 null
+  pinned: true,                   // 또는 null
+  limit: 20,
+);
+
+반환 타입: List<Notice>
+Notice 필드
+int id // notice_no
+String title
+String content
+String author
+DateTime createdAt
+NoticeCategory category
+bool pinned
+int views
+int commentCount
+
+1-2. 제목으로 검색
+final notices = await FirestoreService.searchNoticesByExactTitle(
+  '점검 안내',
+  limit: 10,
+);
+
+1-3. 전체 공지(최신순)
+final notices = await FirestoreService.fetchAllNotices(limit: 50);
+
+1-4. notice_no 로 단일 조회
+final notice = await FirestoreService.getNoticeByNo(1);
+if (notice != null) {
+  // 사용
+}
+
+1-5. 생성 / 수정 / 삭제
+// 생성
+final id = await FirestoreService.createNotice(
+  Notice(
+    id: 1,
+    title: '제목',
+    content: '내용',
+    author: '운영팀',
+    createdAt: DateTime.now(),
+    category: NoticeCategory.general,
+    pinned: false,
+    views: 0,
+    commentCount: 0,
+  ),
+);
+
+// 수정
+await FirestoreService.updateNotice(id, updatedNotice);
+
+// 삭제
+await FirestoreService.deleteNotice(id);
+
+2. 게시글 / 댓글 (Community)
+2-1. 게시글 목록
+final posts = await FirestoreService.fetchCommunityPosts(
+  category: PostCategory.free, // 또는 null
+  authorUid: 'uid-123',        // 또는 null
+  limit: 20,
+);
+
+
+반환 타입: List<CommunityPost>
+CommunityPost 필드
+int id // post_no
+String title
+String content
+String author
+DateTime createdAt
+PostCategory category
+int views
+int commentCount
+int likes
+
+2-2. 제목으로 검색
+final posts = await FirestoreService.searchPostsByExactTitle(
+  '리버레이션 소드 시세',
+  limit: 10,
+);
+
+2-3. 전체 게시글(최신순)
+final posts = await FirestoreService.fetchAllCommunityPosts(limit: 50);
+
+2-4. 게시글 CRUD
+// 생성
+final docId = await FirestoreService.createCommunityPost(
+  CommunityPost(
+    id: 1,
+    title: '제목',
+    content: '내용',
+    author: '닉네임',
+    createdAt: DateTime.now(),
+    category: PostCategory.free,
+    views: 0,
+    commentCount: 0,
+    likes: 0,
+  ),
+);
+
+// 수정
+await FirestoreService.updateCommunityPost(docId, updatedPost);
+
+// 삭제
+await FirestoreService.deleteCommunityPost(docId);
+
+2-5. 댓글 목록 / 단일 / CRUD
+// 댓글 목록
+final comments = await FirestoreService.fetchCommentsForPost(
+  postDocId,
+  limit: 100,
+);
+
+// 단일 댓글
+final comment = await FirestoreService.getCommentById(
+  postDocId,
+  commentDocId,
+);
+
+// 생성
+final commentId = await FirestoreService.createCommentForPost(
+  postDocId,
+  CommunityComment(
+    id: 1,
+    postId: 1,
+    author: '익명',
+    content: '댓글 내용',
+    createdAt: DateTime.now(),
+    likes: 0,
+  ),
+);
+
+// 수정
+await FirestoreService.updateCommentForPost(
+  postDocId,
+  commentId,
+  updatedComment,
+);
+
+// 삭제
+await FirestoreService.deleteCommentForPost(
+  postDocId,
+  commentId,
+);
+
+
+CommunityComment 필드
+int id
+int postId
+String author
+String content
+DateTime createdAt
+int likes
+
+3. 유저(AppUser)
+3-1. UID 로 단일 조회
+final user = await FirestoreService.getUserByUid('uid-123');
+
+
+AppUser 필드
+String uid
+String? email
+String displayName
+String provider
+String role
+DateTime createdAt
+DateTime? lastLoginAt
+DateTime? lastActionAt
+
+3-2. 검색
+// 닉네임으로 검색
+final usersByName =
+    await FirestoreService.searchUsersByDisplayName('닉네임', limit: 20);
+
+// 이메일로 검색
+final usersByEmail =
+    await FirestoreService.searchUsersByEmail('test@example.com', limit: 20);
+
+3-3. 생성 / 수정 / 삭제
+// 생성
+await FirestoreService.createUser(
+  AppUser(
+    uid: 'uid-123',
+    email: 'test@example.com',
+    displayName: '닉네임',
+    provider: 'google',
+    role: 'user',
+    createdAt: DateTime.now(),
+    lastLoginAt: null,
+    lastActionAt: null,
+  ),
+);
+
+// 수정
+await FirestoreService.updateUser(updatedUser);
+
+// 삭제
+await FirestoreService.deleteUser('uid-123');
+
+4. 경매(Auction)
+4-1. 특정 아이템의 경매 리스트 (간단 모델)
+final simpleListings =
+    await FirestoreService.fetchAuctionListingsSimple(
+  'itemId-xxxx', // auction_items 컬렉션의 docId
+  limit: 50,
+);
+
+
+반환 타입: List<auction_simple.AuctionItem>
+auction_simple.AuctionItem 필드(리스트용)
+int id // auctionId
+String name // itemName
+int price // unitPrice
+String? seller
+String? imagePath
+
+4-2. 특정 아이템의 경매 리스트 (상세 모델)
+final detailListings =
+    await FirestoreService.fetchAuctionListingsDetail(
+  'itemId-xxxx',
+  limit: 50,
+);
+
+
+반환 타입: List<auction_detail.AuctionItem>
+auction_detail.AuctionItem 필드
+String name
+String rarity
+RarityCode rarityCode
+String type
+String subType
+int levelLimit
+AttackStats attack
+int physical
+int magical
+int independent
+int intelligence
+int combatPower // fame 기준
+List<String> options // itemExplainDetail 분해
+double? weightKg // 현재 null
+String? durability // 현재 null
+String imagePath
+
+Map<PriceRange, List<double>> history // 현재 {}
+
+5. 시세 요약(ItemPrice)
+5-1. itemId로 시세 1개 가져오기
+final price = await FirestoreService.getItemPriceByItemId(
+  'itemId-xxxx',
+);
+
+if (price != null) {
+  // 사용
+}
+
+5-2. itemName으로 시세 목록 검색
+final prices = await FirestoreService.searchItemPricesByName(
+  '검은 성전의 기억 : 소검',
+  limit: 10,
+);
+
+
+ItemPrice 필드
+String name
+int avgPrice
+String trend // '0.0%' 같은 문자열
+
+6. 모든 auction_items 전체 로드(초기 init용)
+6-1. 전체 + 간단 모델
+final allSimple = await FirestoreService.fetchAllAuctionListingsSimple(
+  perItemLimit: 30, // 각 itemId당 listings 최대 개수
+);
+
+// 구조: { itemId: List<AuctionItemSimple> }
+allSimple.forEach((itemId, listings) {
+  // itemId: auction_items 컬렉션의 docId
+  // listings: 해당 아이템의 경매 리스트
+});
+
+6-2. 전체 + 상세 모델
+final allDetail = await FirestoreService.fetchAllAuctionListingsDetail(
+  perItemLimit: 30,
+);
+
+// 구조: { itemId: List<AuctionItemDetail> }
+allDetail.forEach((itemId, listings) {
+  // listings: 상세 AuctionItem 리스트
+});

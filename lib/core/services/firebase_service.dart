@@ -1,6 +1,4 @@
 // lib/core/services/firebase_service.dart
-// import 'dart:convert'; // 디버그용 로그 안 쓰면 이건 지워도 됨
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'firestore_mappers.dart';
@@ -17,25 +15,20 @@ import '../../features/community/model/community_comment.dart';
 // auth user
 import '../../features/auth/model/app_user.dart';
 
-
-
-// 위쪽 import들 유지하고, 밑에 추가
+// auction
 import '../../features/auction/models/auction_item.dart' as auction_simple;
 import '../../features/auction/models/auction_item_data.dart' as auction_detail;
 import 'package:flutter_fb/features/auction/models/item_price.dart';
 
-
-
 class FirestoreService {
-  FirestoreService._(); // 생성 막기 (정적 유틸 클래스처럼 사용)
+  FirestoreService._();
 
   static final FirebaseFirestore _db = FirebaseFirestore.instance;
 
-  // ─────────────────────────────────────────────
-  // 1) Notice(공지사항) READ
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------------------------------------
+  // 1) Notice
+  // ---------------------------------------------------------------------------
 
-  /// 카테고리, pinned 여부로 공지 검색 (최신순)
   static Future<List<Notice>> fetchNotices({
     NoticeCategory? category,
     bool? pinned,
@@ -55,7 +48,6 @@ class FirestoreService {
     return noticesFromQuerySnapshot(snap);
   }
 
-  /// 제목 완전 일치 검색
   static Future<List<Notice>> searchNoticesByExactTitle(
     String title, {
     int limit = 20,
@@ -69,7 +61,6 @@ class FirestoreService {
     return noticesFromQuerySnapshot(snap);
   }
 
-  /// 필터 없이 전체 공지 가져오기 (최신순)
   static Future<List<Notice>> fetchAllNotices({int limit = 50}) async {
     final snap = await _db
         .collection('notices')
@@ -80,7 +71,6 @@ class FirestoreService {
     return noticesFromQuerySnapshot(snap);
   }
 
-  /// notice_no(숫자 id) 로 공지 한 개 가져오기
   static Future<Notice?> getNoticeByNo(int noticeNo) async {
     final snap = await _db
         .collection('notices')
@@ -92,32 +82,24 @@ class FirestoreService {
     return noticeFromFirestoreDoc(snap.docs.first);
   }
 
-  // ─────────────────────────────────────────────
-  // 1-1) Notice(공지사항) CREATE / UPDATE / DELETE
-  // ─────────────────────────────────────────────
-
-  /// 공지 생성 (자동 docId 반환)
-  /// - Notice.id(notice_no)는 이미 채워져 있다고 가정
   static Future<String> createNotice(Notice notice) async {
     final data = noticeToFirestoreMap(notice);
     final ref = await _db.collection('notices').add(data);
     return ref.id;
   }
 
-  /// 공지 수정 (docId 기준)
   static Future<void> updateNotice(String docId, Notice notice) async {
     final data = noticeToFirestoreMap(notice);
     await _db.collection('notices').doc(docId).update(data);
   }
 
-  /// 공지 삭제 (docId 기준)
   static Future<void> deleteNotice(String docId) async {
     await _db.collection('notices').doc(docId).delete();
   }
 
-  // ─────────────────────────────────────────────
-  // 2) CommunityPost(boards 컬렉션) READ
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------------------------------------
+  // 2) CommunityPost / Comment
+  // ---------------------------------------------------------------------------
 
   static Future<List<CommunityPost>> fetchCommunityPosts({
     PostCategory? category,
@@ -170,18 +152,12 @@ class FirestoreService {
     }
   }
 
-  // ─────────────────────────────────────────────
-  // 2-1) CommunityPost CREATE / UPDATE / DELETE
-  // ─────────────────────────────────────────────
-
-  /// 게시글 생성 (boards 컬렉션, docId 반환)
   static Future<String> createCommunityPost(CommunityPost post) async {
     final data = communityPostToFirestoreMap(post);
     final ref = await _db.collection('boards').add(data);
     return ref.id;
   }
 
-  /// 게시글 수정 (docId 기준)
   static Future<void> updateCommunityPost(
     String docId,
     CommunityPost post,
@@ -190,16 +166,9 @@ class FirestoreService {
     await _db.collection('boards').doc(docId).update(data);
   }
 
-  /// 게시글 삭제 (docId 기준)
-  /// ※ 하위 comments 서브컬렉션까지 같이 지우고 싶으면
-  ///    여기에 추가 로직 또는 Cloud Function 사용하는 걸 추천
   static Future<void> deleteCommunityPost(String docId) async {
     await _db.collection('boards').doc(docId).delete();
   }
-
-  // ─────────────────────────────────────────────
-  // 2-2) CommunityComment(boards/{post}/comments) READ
-  // ─────────────────────────────────────────────
 
   static Future<List<CommunityComment>> fetchCommentsForPost(
     String postDocId, {
@@ -231,11 +200,6 @@ class FirestoreService {
     return commentFromFirestoreDoc(doc);
   }
 
-  // ─────────────────────────────────────────────
-  // 2-3) CommunityComment CREATE / UPDATE / DELETE
-  // ─────────────────────────────────────────────
-
-  /// 댓글 생성 (해당 게시글의 comments 서브컬렉션, docId 반환)
   static Future<String> createCommentForPost(
     String postDocId,
     CommunityComment comment,
@@ -249,7 +213,6 @@ class FirestoreService {
     return ref.id;
   }
 
-  /// 댓글 수정
   static Future<void> updateCommentForPost(
     String postDocId,
     String commentDocId,
@@ -264,7 +227,6 @@ class FirestoreService {
         .update(data);
   }
 
-  /// 댓글 삭제
   static Future<void> deleteCommentForPost(
     String postDocId,
     String commentDocId,
@@ -277,9 +239,9 @@ class FirestoreService {
         .delete();
   }
 
-  // ─────────────────────────────────────────────
-  // 3) AppUser(유저) READ
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------------------------------------
+  // 3) AppUser
+  // ---------------------------------------------------------------------------
 
   static Future<AppUser?> getUserByUid(String uid) async {
     final doc = await _db.collection('users').doc(uid).get();
@@ -313,32 +275,24 @@ class FirestoreService {
     return appUsersFromQuerySnapshot(snap);
   }
 
-  // ─────────────────────────────────────────────
-  // 3-1) AppUser CREATE / UPDATE / DELETE
-  // ─────────────────────────────────────────────
-
-  /// uid를 doc id로 사용해서 유저 생성
   static Future<void> createUser(AppUser user) async {
     final data = appUserToFirestoreMap(user);
     await _db.collection('users').doc(user.uid).set(data);
   }
 
-  /// 유저 정보 수정
   static Future<void> updateUser(AppUser user) async {
     final data = appUserToFirestoreMap(user);
     await _db.collection('users').doc(user.uid).update(data);
   }
 
-  /// 유저 삭제
   static Future<void> deleteUser(String uid) async {
     await _db.collection('users').doc(uid).delete();
   }
 
-    // ─────────────────────────────────────────────
+  // ---------------------------------------------------------------------------
   // 4) Auction: listings / item_prices
-  // ─────────────────────────────────────────────
+  // ---------------------------------------------------------------------------
 
-  /// 특정 itemId의 경매 listings를 간단 모델로 가져오기
   static Future<List<auction_simple.AuctionItem>>
       fetchAuctionListingsSimple(
     String itemId, {
@@ -348,14 +302,13 @@ class FirestoreService {
         .collection('auction_items')
         .doc(itemId)
         .collection('listings')
-        .orderBy('unitPrice') // 필요에 따라 정렬 변경
+        .orderBy('unitPrice')
         .limit(limit)
         .get();
 
     return auctionSimpleItemsFromQuerySnapshot(snap);
   }
 
-  /// 특정 itemId의 경매 listings를 상세 모델로 가져오기
   static Future<List<auction_detail.AuctionItem>>
       fetchAuctionListingsDetail(
     String itemId, {
@@ -372,20 +325,15 @@ class FirestoreService {
     return auctionDetailItemsFromQuerySnapshot(snap);
   }
 
-  /// 특정 itemId의 시세 요약 가져오기
   static Future<ItemPrice?> getItemPriceByItemId(
     String itemId,
   ) async {
-    final doc = await _db
-        .collection('item_prices')
-        .doc(itemId)
-        .get();
+    final doc = await _db.collection('item_prices').doc(itemId).get();
 
     if (!doc.exists) return null;
     return itemPriceFromFirestoreDoc(doc);
   }
 
-  /// itemName으로 item_prices 검색 (itemName이 정확히 저장돼 있을 때)
   static Future<List<ItemPrice>> searchItemPricesByName(
     String name, {
     int limit = 20,
@@ -397,5 +345,55 @@ class FirestoreService {
         .get();
 
     return itemPricesFromQuerySnapshot(snap);
+  }
+
+  // ---------------------------------------------------------------------------
+  // 4-1) Auction: fetch all auction_items
+  // ---------------------------------------------------------------------------
+
+  /// All auction_items with simple listings mapped.
+  /// Return: { itemId: List<AuctionItemSimple> }
+  static Future<Map<String, List<auction_simple.AuctionItem>>>
+      fetchAllAuctionListingsSimple({
+    int perItemLimit = 50,
+  }) async {
+    final rootSnap = await _db.collection('auction_items').get();
+
+    final Map<String, List<auction_simple.AuctionItem>> result = {};
+
+    for (final doc in rootSnap.docs) {
+      final listingsSnap = await doc.reference
+          .collection('listings')
+          .orderBy('unitPrice')
+          .limit(perItemLimit)
+          .get();
+
+      result[doc.id] = auctionSimpleItemsFromQuerySnapshot(listingsSnap);
+    }
+
+    return result;
+  }
+
+  /// All auction_items with detail listings mapped.
+  /// Return: { itemId: List<AuctionItemDetail> }
+  static Future<Map<String, List<auction_detail.AuctionItem>>>
+      fetchAllAuctionListingsDetail({
+    int perItemLimit = 50,
+  }) async {
+    final rootSnap = await _db.collection('auction_items').get();
+
+    final Map<String, List<auction_detail.AuctionItem>> result = {};
+
+    for (final doc in rootSnap.docs) {
+      final listingsSnap = await doc.reference
+          .collection('listings')
+          .orderBy('unitPrice')
+          .limit(perItemLimit)
+          .get();
+
+      result[doc.id] = auctionDetailItemsFromQuerySnapshot(listingsSnap);
+    }
+
+    return result;
   }
 }
