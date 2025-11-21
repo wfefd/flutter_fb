@@ -257,3 +257,132 @@ const List<AuctionItem> kAuctionItems = [
     },
   ),
 ];
+
+/// ─────────────────────────────────────────────
+/// 🔽 여기부터 추가 코드: JSON 변환 헬퍼
+/// ─────────────────────────────────────────────
+
+extension AttackStatsJsonX on AttackStats {
+  Map<String, dynamic> toJson() {
+    return {
+      'physical': physical,
+      'magical': magical,
+      'independent': independent,
+    };
+  }
+
+  static AttackStats fromJson(Map<String, dynamic> json) {
+    return AttackStats(
+      physical: json['physical'] as int? ?? 0,
+      magical: json['magical'] as int? ?? 0,
+      independent: json['independent'] as int? ?? 0,
+    );
+  }
+}
+
+extension AuctionItemJsonX on AuctionItem {
+  Map<String, dynamic> toJson() {
+    // history는 Map<String, List<double>> 형태로 변환해서 저장
+    final Map<String, List<double>> historyJson = {};
+    for (final entry in history.entries) {
+      historyJson[entry.key.key] = entry.value;
+    }
+
+    return {
+      'name': name,
+      'rarity': rarity,
+      'rarityCode': rarityCode.name, // 'legendary' / 'unique' / 'rare'
+      'type': type,
+      'subType': subType,
+      'levelLimit': levelLimit,
+      'attack': attack.toJson(),
+      'intelligence': intelligence,
+      'combatPower': combatPower,
+      'options': options,
+      'weightKg': weightKg,
+      'durability': durability,
+      'imagePath': imagePath,
+      'history': historyJson,
+    };
+  }
+
+  static AuctionItem fromJson(Map<String, dynamic> json) {
+    final String rarityStr = json['rarity'] as String? ?? '';
+    final String rarityCodeStr =
+        json['rarityCode'] as String? ?? 'rare';
+
+    // rarityCode는 name 기반으로 우선 복원, 안 되면 텍스트에서 추론
+    RarityCode rarityCode;
+    switch (rarityCodeStr) {
+      case 'legendary':
+        rarityCode = RarityCode.legendary;
+        break;
+      case 'unique':
+        rarityCode = RarityCode.unique;
+        break;
+      case 'rare':
+      default:
+        // 혹시 name이 아니라 '레전더리' 같은 텍스트만 온 경우 대비
+        rarityCode = rarityCodeFrom(rarityStr.toLowerCase());
+        break;
+    }
+
+    // attack
+    final attackJson = json['attack'] as Map<String, dynamic>? ?? {};
+    final attack = AttackStatsJsonX.fromJson(attackJson);
+
+    // options
+    final List<String> options = (json['options'] as List<dynamic>?)
+            ?.map((e) => e.toString())
+            .toList() ??
+        const <String>[];
+
+    // history (Map<String, List<double>> -> Map<PriceRange, List<double>>)
+    final Map<PriceRange, List<double>> history = {};
+    final historyRaw = json['history'] as Map<String, dynamic>?;
+
+    if (historyRaw != null) {
+      historyRaw.forEach((key, value) {
+        final List<double> list = (value as List<dynamic>?)
+                ?.map((e) => (e as num).toDouble())
+                .toList() ??
+            const <double>[];
+
+        switch (key) {
+          case 'd7':
+            history[PriceRange.d7] = list;
+            break;
+          case 'd14':
+            history[PriceRange.d14] = list;
+            break;
+          case 'd30':
+            history[PriceRange.d30] = list;
+            break;
+          case 'd90':
+            history[PriceRange.d90] = list;
+            break;
+          case 'd365':
+            history[PriceRange.d365] = list;
+            break;
+        }
+      });
+    }
+
+    return AuctionItem(
+      name: json['name'] as String? ?? '',
+      rarity: rarityStr,
+      rarityCode: rarityCode,
+      type: json['type'] as String? ?? '',
+      subType: json['subType'] as String? ?? '',
+      levelLimit: json['levelLimit'] as int? ?? 0,
+      attack: attack,
+      intelligence: json['intelligence'] as int? ?? 0,
+      combatPower: json['combatPower'] as int? ?? 0,
+      options: options,
+      imagePath: json['imagePath'] as String? ?? '',
+      weightKg: (json['weightKg'] as num?)?.toDouble(),
+      durability: json['durability'] as String?,
+      history: history,
+    );
+  }
+}

@@ -17,6 +17,15 @@ import '../../features/community/model/community_comment.dart';
 // auth user
 import '../../features/auth/model/app_user.dart';
 
+
+
+// 위쪽 import들 유지하고, 밑에 추가
+import '../../features/auction/models/auction_item.dart' as auction_simple;
+import '../../features/auction/models/auction_item_data.dart' as auction_detail;
+import 'package:flutter_fb/features/auction/models/item_price.dart';
+
+
+
 class FirestoreService {
   FirestoreService._(); // 생성 막기 (정적 유틸 클래스처럼 사용)
 
@@ -323,5 +332,70 @@ class FirestoreService {
   /// 유저 삭제
   static Future<void> deleteUser(String uid) async {
     await _db.collection('users').doc(uid).delete();
+  }
+
+    // ─────────────────────────────────────────────
+  // 4) Auction: listings / item_prices
+  // ─────────────────────────────────────────────
+
+  /// 특정 itemId의 경매 listings를 간단 모델로 가져오기
+  static Future<List<auction_simple.AuctionItem>>
+      fetchAuctionListingsSimple(
+    String itemId, {
+    int limit = 50,
+  }) async {
+    final snap = await _db
+        .collection('auction_items')
+        .doc(itemId)
+        .collection('listings')
+        .orderBy('unitPrice') // 필요에 따라 정렬 변경
+        .limit(limit)
+        .get();
+
+    return auctionSimpleItemsFromQuerySnapshot(snap);
+  }
+
+  /// 특정 itemId의 경매 listings를 상세 모델로 가져오기
+  static Future<List<auction_detail.AuctionItem>>
+      fetchAuctionListingsDetail(
+    String itemId, {
+    int limit = 50,
+  }) async {
+    final snap = await _db
+        .collection('auction_items')
+        .doc(itemId)
+        .collection('listings')
+        .orderBy('unitPrice')
+        .limit(limit)
+        .get();
+
+    return auctionDetailItemsFromQuerySnapshot(snap);
+  }
+
+  /// 특정 itemId의 시세 요약 가져오기
+  static Future<ItemPrice?> getItemPriceByItemId(
+    String itemId,
+  ) async {
+    final doc = await _db
+        .collection('item_prices')
+        .doc(itemId)
+        .get();
+
+    if (!doc.exists) return null;
+    return itemPriceFromFirestoreDoc(doc);
+  }
+
+  /// itemName으로 item_prices 검색 (itemName이 정확히 저장돼 있을 때)
+  static Future<List<ItemPrice>> searchItemPricesByName(
+    String name, {
+    int limit = 20,
+  }) async {
+    final snap = await _db
+        .collection('item_prices')
+        .where('itemName', isEqualTo: name)
+        .limit(limit)
+        .get();
+
+    return itemPricesFromQuerySnapshot(snap);
   }
 }
